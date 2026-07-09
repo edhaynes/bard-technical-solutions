@@ -2,6 +2,16 @@
 
 Newest on top. Latest entry supersedes older ones where they conflict.
 
+## 2026-07-09 — Basic /demos page added (CAN Studio + The SAT Challenge)
+
+- Added `demos/index.html` (served at `/demos`) with two on-brand cards: **CAN Studio** (certified
+  CAN-bus analysis) and **The SAT Challenge** (the 1982 coin-rotation SAT bug Vulcan gets right).
+  Deliberately minimal — request-a-demo CTAs to `#contact`, no live-app embed (keeps the Vulcan IP
+  in the private repo); marketing to polish later. Nav link "Demos" added to `index.html`.
+- v1.3.4. First Pages build errored transiently (the documented GitHub Actions/Pages delay, not a
+  content problem — did NOT re-architect per CLAUDE.md); the next build succeeded.
+  **`tools/verify_live.sh 1.3.4` PASSED**; `bardtek.com/demos/` serves 200 with both cards.
+
 ## 2026-07-09 — Flying owl removed, static owl recolored gold-on-navy, live-verify gate added
 
 - Root-caused why 4–5 prior "remove the flying owl" attempts failed: no removal commit ever
