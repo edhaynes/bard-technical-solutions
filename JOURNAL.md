@@ -2,6 +2,23 @@
 
 Newest on top. Latest entry supersedes older ones where they conflict.
 
+## 2026-07-09 — CAN Studio demo built (live capture page) — v1.3.7 — LOCAL COMMIT, NOT YET DEPLOYED
+
+- Built `demos/can/index.html`: an interactive CAN Studio demo modeled on the SAT page but
+  **rebranded to the main site** (navy/gold, `../../styles.css`, Inter/Sora, site header/footer)
+  rather than the SAT page's standalone dark-green palette. Leads with a live-capture monitor
+  (frames stream at true recorded cadence; each proven NORMAL/ANOMALY and the exact invariant
+  named) + four attack exhibit cards; deep content (honest 53,802-frame comma2k19 RAV4 disclosure
+  incl. the 40.8% false-positive rate, the invariant catalog, the RAV4-subset DBC) is collapsed
+  behind four `<details>` expanders.
+- All verdict/frame data is **verbatim from the real `vulcan can` CLI** (run 2026-07-09 from
+  `/Users/edhayn/vulcan-cli`, `demo/can_demo.py`). Self-contained: no Vulcan IP in this public repo.
+- Wired the `/demos` CAN Studio card from "Request this demo" → `can/` ("Try the demo").
+- Bumped `CONFIG.version` 1.3.6 → 1.3.7. Validated: HTML tags balanced, JS `node --check` passes,
+  headless-Chrome render confirms branding/layout.
+- **STATUS: committed locally on `main`, NOT pushed.** To deploy: `git pull --rebase origin main`,
+  push, then `./tools/verify_live.sh 1.3.7` must PASS (per CLAUDE.md). Awaiting permissions to push.
+
 ## 2026-07-09 — Basic /demos page added (CAN Studio + The SAT Challenge)
 
 - Added `demos/index.html` (served at `/demos`) with two on-brand cards: **CAN Studio** (certified
