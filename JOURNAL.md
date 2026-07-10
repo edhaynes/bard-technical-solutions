@@ -2,7 +2,7 @@
 
 Newest on top. Latest entry supersedes older ones where they conflict.
 
-## 2026-07-09 — CAN Studio: measured µsec timing added — v1.3.8
+## 2026-07-09 — CAN Studio: measured µsec timing added — v1.3.8 — DEPLOYED ✓ (verify_live PASS)
 
 - Brought back per-frame microsecond timing on the CAN demo (backlog #1). Numbers are **measured,
   not modeled**: median of 4,001 `verify_observation()` calls per frame (fresh cadence state each
