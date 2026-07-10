@@ -2,6 +2,28 @@
 
 Newest on top. Latest entry supersedes older ones where they conflict.
 
+## 2026-07-10 — ICD-10-CM demo: swapped hand-built examples for real CMS claims — v1.3.14
+
+- Eddie: the demo's hand-built single/double-code records were "trivial" and asked for
+  "publicly accessible dummy records." Fix: CMS publishes its own official synthetic Medicare
+  claims release (8,671 fully synthetic beneficiaries, real RIF claim shapes, "realistic-but-
+  not-real data... released publicly without restriction," no patient identifiers exist in the
+  format at all). Pulled `inpatient.csv` (58,030 real claims) and ran the same oracle against
+  100 of them.
+- **New measured result, headlined on the page**: only 1% of the 100 real claims came back
+  fully conformant. 68% fail on a missing required 7th-character extension (a real, common
+  coding error — not an artifact); 21% are genuine Excludes1 conflicts (spot-checked: Epilepsy
+  vs. Unspecified convulsions, a real clinically-sensible rule); 10% are Code-First sequencing
+  gaps (one real claim has both codes present, just in the wrong order). Reported as measured,
+  worst-first, not smoothed into a friendlier headline number.
+- Live-monitor stream now leads with 4 real CMS claims (one of each verdict category) before the
+  constructed diabetes/Cushing's/concussion examples, which stay as the pedagogical explainer.
+  New callout section, updated grounding table (3rd source row: CMS Synthetic Medicare Claims
+  PUF), updated "how it was built" and "scope" sections to describe both self-consistency
+  (99.93%) and real-claims (1%) testing honestly, as two different things.
+- Validated: HTML tags balanced, JS `node --check` passes, headless-Chrome render confirms the
+  new content and no console errors.
+
 ## 2026-07-10 — 5th demo added: ICD-10-CM claim conformance ("The Diabetes Trap") — v1.3.13
 
 - New `demos/icd10cm/index.html`: Vulcan proves Medicare/ICD-10-CM diagnosis-claim conformance

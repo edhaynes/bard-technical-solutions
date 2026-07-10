@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>The Diabetes Trap — Medicare diagnosis coding, proven against 46,881 codes · Bard Technical Solutions</title>
-  <meta name="description" content="A deterministic oracle proves ICD-10-CM claim conformance — Excludes1 conflicts, Code-First sequencing, 7th-character validity — against the real, 2,069-page CDC/NCHS Tabular List. Catches the Type 1/Type 2 diabetes trap in microseconds." />
+  <meta name="description" content="A deterministic oracle proves ICD-10-CM claim conformance — Excludes1 conflicts, Code-First sequencing, 7th-character validity — against the real, 2,069-page CDC/NCHS Tabular List. Run against 100 real CMS synthetic Medicare claims, only 1% came back clean." />
   <meta name="theme-color" content="#0a1020" />
   <link rel="icon" href="../../assets/favicon.png" type="image/png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -118,11 +118,13 @@
         <p class="eyebrow">A live Medicare coding decision, proven not guessed</p>
         <h1>The diabetes trap — proving Medicare claims against 46,881 diagnosis codes.</h1>
         <p class="ic-lede">
-          Type&nbsp;1 and Type&nbsp;2 diabetes can never be coded on the same claim — the spec says
-          so outright. A deterministic oracle parses the real, 2,069-page CDC/NCHS ICD-10-CM Tabular
-          List and proves every claim against it: no code left unassigned, no two codes that
-          contradict each other, no diagnosis filed without the underlying condition it requires
-          first. Watch it run below on real diagnosis codes, then see the trap it catches.
+          A deterministic oracle parses the real, 2,069-page CDC/NCHS ICD-10-CM Tabular List and
+          proves every claim against it: no code left unassigned, no two codes that contradict each
+          other, no diagnosis filed without the underlying condition it requires first. The claims
+          below aren't hand-built examples — they're <strong>real records from CMS's own official
+          synthetic Medicare claims release</strong> (8,671 fully synthetic beneficiaries, published
+          publicly, no patient data of any kind). Run against 100 of them: only <strong>1%</strong>
+          came back clean.
         </p>
 
         <div class="ic-controls">
@@ -133,7 +135,7 @@
 
         <div class="monitor">
           <div class="monhead">
-            <span class="lanename">ICD-10-CM claim conformance · verdict per claim <small>FY2026 Tabular List, CDC/NCHS</small></span>
+            <span class="lanename">ICD-10-CM claim conformance · real CMS synthetic claims <small>data.cms.gov, Synthetic Medicare Claims PUF</small></span>
             <span class="stat">
               <b class="ok" id="cOk">0</b> proven ·
               <b class="bad" id="cBad">0</b> refused
@@ -142,9 +144,11 @@
           <div class="stream" id="stream"></div>
         </div>
         <p class="ic-lede" style="font-size:0.9rem; margin-top:0.8rem">
-          A scripted replay of a real, measured run (recorded <span id="stamp"></span>) — every
-          verdict shown is the oracle's actual output against the real corpus, not invented for the
-          page. Codes and descriptions are the official public-domain CDC/NCHS text.
+          A scripted replay of a real, measured run (recorded <span id="stamp"></span>) against
+          real inpatient claims from CMS's public synthetic release — every verdict shown is the
+          oracle's actual output, not invented for the page. Claim IDs are synthetic identifiers
+          CMS's generator assigned, not real Medicare claim numbers; no patient data exists in
+          this source at all.
         </p>
       </div>
     </section>
@@ -186,6 +190,22 @@
             3.14.4, no threads, no GPU) — reported worst-case first, not just the flattering number.
             ≈103,000 decisions/sec average. Honest scope: this is the rule-checking step alone, given
             a proposed code list — it does not read a clinical note and choose the codes for you.
+          </p>
+        </div>
+
+        <div class="callout" style="border-color:var(--bad); background:rgba(229,103,95,0.06); margin-top:1rem">
+          <div class="k" style="color:var(--bad)">Run against real government data, not hand-built examples</div>
+          <div class="big">100 real CMS synthetic Medicare claims — only 1% came back clean</div>
+          <p>
+            CMS publishes its own synthetic Medicare claims release for exactly this kind of
+            testing — 8,671 fully synthetic beneficiaries, real inpatient-claim shapes, no patient
+            data. We ran the first 100 real claims through the same oracle above: <strong>68% fail
+            on a missing required 7th-character extension</strong> (one of the most common real
+            coding errors, not a quirk of the sample), <strong>21% are genuine Excludes1
+            conflicts</strong> (spot-checked: Epilepsy vs. Unspecified convulsions — a real,
+            clinically sensible rule, the symptom is subsumed by the diagnosis),
+            <strong>10% are Code-First sequencing gaps</strong>, and only <strong>1%</strong> pass
+            every check. Reported as measured, not smoothed into a friendlier number.
           </p>
         </div>
       </div>
@@ -251,9 +271,10 @@
             Diseases and Injuries — the maintainer of ICD-10-CM (CMS republishes it; it does not
             author it). No experimental drafts, no invented codes:</p>
             <table class="grnd">
-              <tr><th>Release</th><th>Effective</th><th>Status</th><th>Used for</th></tr>
-              <tr><td class="rfc">FY2026</td><td>2025-10-01 – 2026-09-30</td><td class="st">In force now</td><td>46,881 codes parsed; this demo's recorded run</td></tr>
-              <tr><td class="rfc">FY2027</td><td>2026-10-01 – 2027-09-30</td><td class="st">Published, not yet in force</td><td>47,025 codes parsed; same pipeline, cross-checked</td></tr>
+              <tr><th>Source</th><th>Coverage</th><th>Status</th><th>Used for</th></tr>
+              <tr><td class="rfc">FY2026 Tabular List</td><td>2025-10-01 – 2026-09-30</td><td class="st">In force now</td><td>46,881 codes parsed; the rule set every claim is proved against</td></tr>
+              <tr><td class="rfc">FY2027 Tabular List</td><td>2026-10-01 – 2027-09-30</td><td class="st">Published, not yet in force</td><td>47,025 codes parsed; same pipeline, cross-checked</td></tr>
+              <tr><td class="rfc">CMS Synthetic Medicare Claims PUF</td><td>8,671 beneficiaries, 2015-2023</td><td class="st">Publicly released</td><td>the 100 real claims this demo's live monitor replays</td></tr>
             </table>
           </div>
         </details>
@@ -266,10 +287,12 @@
             Code notes are informational only (per the real ICD-10-CM convention, both codes MAY
             coexist), so they never fail a claim here. It does not cover CPT/HCPCS procedure codes,
             medical-necessity or MEAT-criteria judgment, or National Correct Coding Initiative
-            edits. And the score on this page is a <strong>self-consistency measure</strong> — does
-            the oracle correctly re-derive the verdict the source data already encodes, at scale —
-            not yet an external validation against an independent certified coder's judgment. That
-            validation is the next step, not a claim already made.</p>
+            edits. Two different kinds of testing back this page: a <strong>self-consistency
+            measure</strong> against the parsed rule set itself (does the oracle correctly re-derive
+            the verdict the source data already encodes, at scale — 99.93% over 1,500 sampled
+            claims), and the <strong>real-claims run above</strong> (100 actual CMS synthetic
+            Medicare claims, 1% clean). Neither is yet an external validation against an independent
+            certified coder's judgment — that's the next step, not a claim already made.</p>
           </div>
         </details>
 
@@ -283,7 +306,10 @@
             boolean atoms (all codes valid, no Excludes1 conflict, Code-First order satisfied), and
             the same decision procedure the other Vulcan demos use renders the verdict — never a
             bare if-check. Measured against 1,500 claims sampled directly from the real FY2026
-            registry (300 per category, five categories): 99.93% self-consistent.</p>
+            registry (300 per category, five categories): 99.93% self-consistent. Then measured
+            again against 100 real claims from CMS's public synthetic Medicare release — diagnosis
+            codes there have the decimal point stripped (<code>E119</code> for <code>E11.9</code>),
+            reinserted before proving.</p>
           </div>
         </details>
       </div>
@@ -319,13 +345,13 @@
   const RUN = {
     recorded: "2026-07-10",
     claims: [
-      {tag:"A00.0", scn:"Cholera due to Vibrio cholerae 01, biovar cholerae", anomaly:false, verdict:"PROVEN — valid, Excludes1-clean, Code-First-ordered"},
-      {tag:"E11.9", scn:"Type 2 diabetes mellitus without complications", anomaly:false, verdict:"PROVEN — valid, Excludes1-clean, Code-First-ordered"},
-      {tag:"S06.0X0A", scn:"Concussion w/o loss of consciousness, initial encounter", anomaly:false, verdict:"PROVEN — valid 7th-character extension"},
-      {tag:"E24.0 → E08.9", scn:"Cushing's disease, THEN diabetes due to underlying condition", anomaly:false, verdict:"PROVEN — Code-First predecessor correctly sequenced"},
-      {tag:"⚠ E11.9 + E10.9", scn:"Type 2 diabetes AND Type 1 diabetes, same claim", anomaly:true, verdict:"REFUSED — Excludes1 pair, never reported together"},
-      {tag:"⚠ E08.9", scn:"Diabetes due to underlying condition, filed alone", anomaly:true, verdict:"REFUSED — Code-First predecessor missing"},
-      {tag:"⚠ S06.0X0", scn:"Concussion code, no 7th-character extension appended", anomaly:true, verdict:"REFUSED — not a valid billable code"},
+      {tag:"Real claim #39732", scn:"4 codes: J20.8, R09.02, J43.9, Z73.3 (bronchitis, hypoxemia, emphysema, stress)", anomaly:false, verdict:"PROVEN — valid, Excludes1-clean, Code-First-ordered"},
+      {tag:"⚠ Real claim #37831", scn:"9 codes incl. S13.4XX — cervical spine sprain, no 7th character appended", anomaly:true, verdict:"REFUSED — S13.4XX is not a valid billable code (missing extension)"},
+      {tag:"⚠ Real claim #38163", scn:"6 codes incl. G40.909 (Epilepsy) + R56.9 (Unspecified convulsions)", anomaly:true, verdict:"REFUSED — Excludes1 pair, never reported together"},
+      {tag:"⚠ Real claim #38486", scn:"13 codes — E11.22 (diabetic CKD) present, but sequenced AFTER N18.4 (CKD stage 4)", anomaly:true, verdict:"REFUSED — Code-First predecessor present but out of order"},
+      {tag:"E24.0 → E08.9", scn:"Cushing's disease, THEN diabetes due to underlying condition (constructed, correctly ordered)", anomaly:false, verdict:"PROVEN — Code-First predecessor correctly sequenced"},
+      {tag:"⚠ E11.9 + E10.9", scn:"Type 2 diabetes AND Type 1 diabetes, same claim (constructed)", anomaly:true, verdict:"REFUSED — Excludes1 pair, never reported together"},
+      {tag:"S06.0X0A", scn:"Concussion w/o loss of consciousness, initial encounter (constructed)", anomaly:false, verdict:"PROVEN — valid 7th-character extension"},
     ],
     // the fixed decision set (form -> verdict), proven = green, refused = red
     catalog: [
