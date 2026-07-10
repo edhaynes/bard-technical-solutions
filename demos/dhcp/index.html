@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The 100% That Wasn't — a tiny model vs. the DHCP relay spec · Bard Technical Solutions</title>
+  <meta name="description" content="A ~1M-parameter model trained from scratch on the DHCP relay spec scores 100% on every held-out scenario — then a hop it never saw proves it memorized instead of learned. A live illustration of why a confident score is not a proof." />
+  <meta name="theme-color" content="#0a1020" />
+  <link rel="icon" href="../../assets/favicon.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="../../styles.css" />
+  <style>
+    /* DHCP demo — brand-token-scoped interactive styles (shared idiom with CAN Studio) */
+    :root {
+      --mono: ui-monospace, SFMono-Regular, Menlo, "Cascadia Code", monospace;
+      --ok: #6fcf97; --bad: #e5675f; --rule: var(--gold-300);
+    }
+    .dh-hero { padding-block: clamp(2.6rem, 6vw, 4.2rem); }
+    .dh-hero h1 { font-size: clamp(1.8rem, 4.2vw, 3rem); letter-spacing: -0.02em; max-width: 20ch; }
+    .dh-hero .dh-lede { color: var(--text-muted); font-size: clamp(1.02rem, 1.8vw, 1.2rem); max-width: 62ch; margin-top: 1rem; }
+
+    .dh-controls { display: flex; gap: 0.8rem; align-items: center; flex-wrap: wrap; margin: 1.4rem 0 0.6rem; }
+    .dh-clock { font: 0.85rem var(--mono); color: var(--text-faint); }
+
+    .monitor { border: 1px solid var(--border); border-radius: var(--radius); background: var(--navy-800); overflow: hidden; box-shadow: var(--shadow); }
+    .monhead { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;
+               padding: 0.8rem 1.1rem; background: rgba(255,255,255,0.03); border-bottom: 1px solid var(--border); }
+    .monhead .lanename { font-weight: 600; font-size: 0.95rem; }
+    .monhead .lanename small { color: var(--text-faint); font-weight: 400; margin-left: 0.5rem; }
+    .stat { font: 0.82rem var(--mono); color: var(--text-muted); }
+    .stat b { font-variant-numeric: tabular-nums; }
+    .stat b.ok { color: var(--ok); } .stat b.bad { color: var(--bad); }
+
+    .stream { max-height: 420px; overflow-y: auto; padding: 0.4rem 0; }
+    .row { display: grid; grid-template-columns: 132px 1fr; gap: 0.7rem; align-items: baseline;
+           padding: 0.5rem 1.1rem; font: 0.8rem/1.5 var(--mono); border-left: 3px solid transparent; }
+    .row .rtag { font-size: 0.72rem; }
+    .row .rtag .real { color: var(--rule); } .row .rtag .spec { color: var(--text-faint); }
+    .row .rscn { color: var(--text-muted); }
+    .row .rverdict { font-weight: 600; margin-top: 0.15rem; grid-column: 2; }
+    .row.fwd { border-left-color: rgba(111,207,151,0.5); }
+    .row.fwd .rverdict { color: var(--ok); }
+    .row.drop { border-left-color: var(--bad); background: rgba(229,103,95,0.06); }
+    .row.drop .rverdict { color: var(--bad); }
+    .row.flash { animation: dhflash 0.9s ease-out; }
+    @keyframes dhflash { from { background: rgba(148,163,184,0.22); } to { background: transparent; } }
+    .row .arrow { color: var(--text-faint); }
+    .row.attack { border-left-color: #e0a53a; background: rgba(224,165,58,0.07); }
+    .row.attack .rverdict { color: var(--bad); }
+    .row .rtag .atk { color: #e0a53a; }
+
+    .callout { margin-top: 1.4rem; border: 1px solid var(--bad); border-radius: var(--radius);
+               padding: 1.2rem 1.3rem; background: rgba(229,103,95,0.06); }
+    .callout .k { font: 0.72rem var(--mono); color: var(--bad); letter-spacing: 0.12em; text-transform: uppercase; }
+    .callout .big { font-size: 1.15rem; font-family: var(--font-display); margin: 0.4rem 0 0.2rem; }
+    .callout p { color: var(--text-muted); font-size: 0.95rem; margin-top: 0.5rem; }
+
+    /* extrapolation reveal */
+    .xtab { width: 100%; border-collapse: collapse; font-size: 0.92rem; margin-top: 0.8rem; }
+    .xtab th, .xtab td { text-align: left; padding: 0.6rem 0.7rem; border-bottom: 1px solid var(--border); }
+    .xtab th { font: 0.72rem var(--mono); color: var(--text-faint); letter-spacing: 0.08em; text-transform: uppercase; }
+    .xtab td.pct { font: 0.95rem var(--mono); font-variant-numeric: tabular-nums; text-align: right; }
+    .xtab td .good { color: var(--ok); } .xtab td .zero { color: var(--bad); }
+
+    .hopgrid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 0.5rem; margin-top: 1rem; }
+    @media (max-width: 640px) { .hopgrid { grid-template-columns: repeat(4, 1fr); } }
+    .hop { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.6rem 0.4rem; text-align: center;
+           font: 0.78rem var(--mono); background: var(--surface); }
+    .hop .in { color: var(--text-faint); }
+    .hop .got { display: block; margin-top: 0.25rem; font-weight: 700; }
+    .hop.ok { border-color: rgba(111,207,151,0.55); } .hop.ok .got { color: var(--ok); }
+    .hop.no { border-color: var(--bad); background: rgba(229,103,95,0.07); } .hop.no .got { color: var(--bad); }
+    .hop .lbl { display: block; margin-top: 0.2rem; font-size: 0.66rem; color: var(--text-faint); }
+
+    details.dh-det { border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface);
+                     margin-top: 1rem; padding: 0 1.2rem; }
+    details.dh-det > summary { cursor: pointer; padding: 1rem 0; font-family: var(--font-display); font-weight: 600;
+                               font-size: 1.02rem; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+    details.dh-det > summary::-webkit-details-marker { display: none; }
+    details.dh-det > summary::after { content: "＋"; color: var(--accent); font-weight: 400; }
+    details.dh-det[open] > summary::after { content: "－"; }
+    details.dh-det .det-body { padding-bottom: 1.2rem; }
+    details.dh-det .det-body p { color: var(--text-muted); font-size: 0.95rem; margin-top: 0.6rem; }
+
+    table.grnd { width: 100%; border-collapse: collapse; font-size: 0.86rem; margin-top: 0.5rem; }
+    table.grnd th, table.grnd td { text-align: left; padding: 0.45rem 0.5rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    table.grnd th { font: 0.72rem var(--mono); color: var(--text-faint); letter-spacing: 0.06em; text-transform: uppercase; }
+    table.grnd td.rfc { font: 0.82rem var(--mono); color: var(--rule); white-space: nowrap; }
+    table.grnd td.st { font: 0.78rem var(--mono); color: var(--text-faint); white-space: nowrap; }
+    .catalog { display: grid; grid-template-columns: 210px 1fr; gap: 0.4rem 1rem; font-size: 0.9rem; margin-top: 0.6rem; }
+    @media (max-width: 560px) { .catalog { grid-template-columns: 1fr; gap: 0.1rem 0; } .catalog .frm { margin-top: 0.5rem; } }
+    .catalog .frm { font: 0.8rem var(--mono); color: var(--ok); }
+    .catalog .frm.drop { color: var(--bad); }
+    .catalog .d { color: var(--text-muted); }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- ============ Header / Nav ============ -->
+  <header class="site-header" id="top">
+    <div class="container nav">
+      <a class="brand" href="../../" aria-label="Bard Technical Solutions home">
+        <img class="brand__mark" src="../../assets/owl.png" width="99" height="120" alt="" aria-hidden="true" />
+        <span class="brand__text">
+          Bard<span class="brand__accent"> Technical Solutions</span>
+        </span>
+      </a>
+      <nav id="nav-menu" class="nav__menu" aria-label="Primary">
+        <a href="../">Demos</a>
+        <a href="../../#approach">Approach</a>
+        <a class="btn btn--small" href="../../#contact">Get in touch</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- ============ Hero ============ -->
+    <section class="section dh-hero">
+      <div class="container">
+        <p class="eyebrow">A tiny model vs. the DHCP relay spec</p>
+        <h1>It scored 100% on the DHCP relay spec. Then we proved it memorized, not learned.</h1>
+        <p class="dh-lede">
+          We cloned a ~1-million-parameter model and trained it from scratch on the DHCP relay
+          decision — RFC&nbsp;1542 and RFC&nbsp;3046, the rules a relay agent follows for every
+          packet. It reached a <strong>perfect 100%</strong> on a fresh, held-out battery. Watch it
+          run below — on real packets from a VM booting locally — and then watch a single hop it was
+          never shown pull the 100% apart. It's the same lesson our verifiers are built on:
+          <em>a confident score is not a proof.</em>
+        </p>
+
+        <div class="dh-controls">
+          <button class="btn" id="playBtn">▶ Run the relay monitor</button>
+          <button class="btn btn--ghost btn--small" id="speedBtn">speed 1×</button>
+          <span class="dh-clock" id="clock"></span>
+        </div>
+
+        <div class="monitor">
+          <div class="monhead">
+            <span class="lanename">relay agent · verdict per packet <small id="srcnote">real VM-boot capture + spec scenarios</small></span>
+            <span class="stat">
+              <b class="ok" id="cFwd">0</b> forwarded ·
+              <b class="bad" id="cDrop">0</b> discarded ·
+              <b style="color:#e0a53a" id="cAtk">0</b> ⚠ probes caught
+            </span>
+          </div>
+          <div class="stream" id="stream"></div>
+        </div>
+        <p class="dh-lede" style="font-size:0.9rem; margin-top:0.8rem">
+          <span style="color:var(--rule)">●</span> real packet, parsed from the capture &nbsp;·&nbsp;
+          <span style="color:var(--text-faint)">●</span> spec scenario &nbsp;·&nbsp;
+          <span style="color:#e0a53a">⚠</span> real adversarial probe — a bad actor trying to register.
+          Every verdict is the model's own generated output.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============ The reveal ============ -->
+    <section class="section section--alt">
+      <div class="container">
+        <div class="section__head" style="text-align:left; max-width:none; margin-bottom:1.2rem">
+          <p class="eyebrow">The reveal — the honest failure mode</p>
+          <h2>100% was memorization. Here's the proof.</h2>
+          <p class="section__sub" style="max-width:66ch">
+            A DHCP relay decision is a small, fully-enumerable function — so a model with enough
+            room can just <em>memorize the table</em> and score 100% without learning anything. To
+            tell memorization from understanding, we trained the hop-count step on relay depths
+            <strong>0–23</strong> and then asked for depths <strong>24–31</strong> it had never seen.
+          </p>
+        </div>
+
+        <table class="xtab">
+          <tr><th>How numbers are shown to the model</th><th>Seen range (0–23)</th><th style="text-align:right">Unseen range (24–31)</th></tr>
+          <tr>
+            <td>Whole tokens (<code>hop 24</code>)</td>
+            <td class="pct"><span class="good">100%</span></td>
+            <td class="pct"><span class="zero">0%</span></td>
+          </tr>
+          <tr>
+            <td>Digits (<code>hop 2 4</code>)</td>
+            <td class="pct"><span class="good">100%</span></td>
+            <td class="pct">62%</td>
+          </tr>
+        </table>
+        <p class="section__sub" style="max-width:66ch; margin-top:0.9rem">
+          With whole-number tokens it scores a flat <strong>0%</strong> on anything unseen — the
+          symbols for 24–31 were never in its vocabulary, so it literally can't say them. Give it the
+          digits and it does better — but look <em>where</em> it breaks:
+        </p>
+
+        <div class="hopgrid" id="hopgrid"></div>
+        <p class="section__sub" style="max-width:70ch; margin-top:1rem">
+          It nails 24→25 through 28→29 — it generalized "add one to the last digit," a pattern the
+          training data taught. But at <strong>29→30 it fails</strong>: it rolls the 9 to 0 and never
+          carries the tens digit up to 3 — because a leading <code>3</code> <em>never once appeared
+          in its training answers</em> (the largest was 24). It didn't learn to count. It learned the
+          exact keystrokes it was shown, and stopped at the first character it had never been asked to
+          write.
+        </p>
+
+        <div class="callout" style="border-color:var(--rule); background:rgba(212,175,90,0.06)">
+          <div class="k" style="color:var(--rule)">The same blind spot — now a security gap</div>
+          <div class="big">A hop-exhaustion flood sets hops = 255. The model can't even read it.</div>
+          <p>
+            One of our adversarial probes floods the relay with the hop count jammed to 255. The
+            deterministic oracle discards it in a single line — <code>hops&nbsp;&gt;&nbsp;16&nbsp;→&nbsp;discard</code>.
+            The trained model, never shown a hop value that large, emits nonsense
+            (<code>"14 option82 giaddr add option82…"</code>) — the identical out-of-range blind spot
+            from above, this time as a way in. The provable rule catches the attack; the confident
+            model doesn't. That is the whole argument, in one packet.
+          </p>
+        </div>
+
+        <div class="callout">
+          <div class="k">Why this matters</div>
+          <div class="big">A perfect score measured coverage, not comprehension.</div>
+          <p>
+            Nothing was wrong with the model or the training — this is what neural pattern-matching
+            <em>is</em>, even when the headline number is 100%. When the cost of a confident-but-wrong
+            answer is real — a vehicle bus, a safety case, a network that has to behave — you don't
+            want a score you have to trust. You want a verdict that shows the rule it checked. That's
+            what the other two demos do.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Details ============ -->
+    <section class="section">
+      <div class="container">
+        <div class="section__head" style="text-align:left; max-width:none; margin-bottom:1.2rem">
+          <p class="eyebrow">Details</p>
+          <h2>The spec it learned, the packets it saw, and how it was built</h2>
+          <p class="section__sub" style="max-width:64ch">
+            No hidden benchmark, no cherry-picked run — the grounding, the decision set, and the
+            provenance are all here. Expand what you want to inspect.
+          </p>
+        </div>
+
+        <details class="dh-det">
+          <summary>Real packets, real verdicts — a VM booting locally</summary>
+          <div class="det-body">
+            <p>We booted a throwaway virtual machine that network-boots over DHCP — literally a
+            machine trying to come up on the network — and captured its handshake off the virtual
+            wire. Each real packet below was parsed and handed to the model as-is:</p>
+            <div id="realtbl" style="margin-top:0.8rem"></div>
+            <p style="margin-top:1rem">A locally-booting VM talks to the server <em>directly</em>,
+            with no relay in the path (relay address 0). So the model correctly says: the client's
+            requests are the kind a relay would <span style="color:var(--ok)">forward</span>, while
+            the server's replies — not addressed through any relay — are
+            <span style="color:var(--bad)">not this relay's to handle</span>. Right call, real data.</p>
+          </div>
+        </details>
+
+        <details class="dh-det">
+          <summary>The decision set — every verdict the relay can reach</summary>
+          <div class="det-body">
+            <p>There is no learned weight quietly deciding an action. The relay's behavior is a fixed
+            set of decisions from the spec; the model was trained to reproduce them, and the held-out
+            battery scores it against the same oracle. Ten decisions, both directions:</p>
+            <div class="catalog" id="catalog"></div>
+          </div>
+        </details>
+
+        <details class="dh-det">
+          <summary>Grounding — the published standards, and only those</summary>
+          <div class="det-body">
+            <p>Every decision traces to a published, active IETF standard. No experimental drafts,
+            no invented behavior:</p>
+            <table class="grnd">
+              <tr><th>RFC</th><th>Title</th><th>Status</th><th>Used for</th></tr>
+              <tr><td class="rfc">2131 / 2132</td><td>Dynamic Host Configuration Protocol &amp; Options</td><td class="st">Draft Std</td><td>message types, DHCPNAK-is-broadcast</td></tr>
+              <tr><td class="rfc">1542</td><td>Clarifications &amp; Extensions for the BOOTP</td><td class="st">Draft Std</td><td>giaddr, hop threshold, unicast-to-server, broadcast flag</td></tr>
+              <tr><td class="rfc">3046</td><td>DHCP Relay Agent Information Option (82)</td><td class="st">Informational</td><td>insert Option 82 upstream, strip it on the reply</td></tr>
+              <tr><td class="rfc">8415</td><td>DHCP for IPv6 (DHCPv6)</td><td class="st">Proposed Std</td><td>a second, harder relay battery (nested relay-forward / hop limit)</td></tr>
+            </table>
+          </div>
+        </details>
+
+        <details class="dh-det">
+          <summary>How it was built</summary>
+          <div class="det-body">
+            <p>A from-scratch decoder-only transformer (~1M parameters), trained on Apple-silicon
+            GPU in about two minutes. It reads a packet's relay-relevant fields written in a small
+            controlled English and <em>generates</em> the verdict word by word — a generative model,
+            graded by exact match against the spec oracle on a freshly-seeded battery it never saw in
+            training. The same recipe hits 100% at a tenth the size, which is the whole point of the
+            reveal above: on a fully-enumerable spec, size buys memorization, not understanding.</p>
+          </div>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ Footer ============ -->
+  <footer class="site-footer">
+    <div class="container footer">
+      <span class="footer__brand">
+        Bard Technical Solutions LLC
+        <small style="display:block;font-weight:500;color:var(--text-faint);">
+          Recorded demonstration · verdicts are verbatim generated output from the trained model; the
+          real packets are parsed from a live QEMU VM-boot capture. All figures reproduced from the
+          run recorded <span id="stamp"></span>.
+          <br><strong>Companion demos:</strong>
+          <a href="/demos/can/" style="color:var(--accent)">CAN Studio — provable vehicle-bus analysis →</a> &nbsp;·&nbsp;
+          <a href="/demos/sat/" style="color:var(--accent)">The SAT Challenge — provable logic vs. frontier models →</a>
+        </small>
+      </span>
+      <span class="footer__meta">
+        © <span data-year></span> Bard Technical Solutions LLC. All rights reserved.
+      </span>
+    </div>
+  </footer>
+
+  <script src="../../main.js"></script>
+  <script>
+  // ---------- recorded run (verbatim: trained kilo-dhcp model + live VM-boot capture, 2026-07-09) ----------
+  const RUN = {
+    recorded: "2026-07-09",
+    // stream: real captured packets first, then spec scenarios the relay is built to handle
+    packets: [
+      {real:true,  tag:"DHCPDISCOVER", scn:"from client · giaddr 0 · hops 0",              act:"fwd",  verdict:"set giaddr · add option 82 · unicast to server"},
+      {real:true,  tag:"DHCPOFFER",    scn:"from server · giaddr 0 (un-relayed)",          act:"drop", verdict:"discard — giaddr zero, not for a relay"},
+      {real:true,  tag:"DHCPREQUEST",  scn:"from client · giaddr 0 · hops 0",              act:"fwd",  verdict:"set giaddr · add option 82 · unicast to server"},
+      {real:true,  tag:"DHCPACK",      scn:"from server · giaddr 0 (un-relayed)",          act:"drop", verdict:"discard — giaddr zero, not for a relay"},
+      {real:false, tag:"relay-forward",scn:"from client · giaddr already set · hops 3",    act:"fwd",  verdict:"keep giaddr · increment hops · forward to server"},
+      {real:false, tag:"server reply", scn:"giaddr set · unicast · option 82 present",     act:"fwd",  verdict:"strip option 82 · unicast to client"},
+      {real:false, tag:"DHCPNAK",      scn:"giaddr set · option 82 present",               act:"fwd",  verdict:"strip option 82 · broadcast DHCPNAK to client"},
+      {real:false, tag:"relay-forward",scn:"from client · giaddr 0 · hops 20",             act:"drop", verdict:"discard — hop count exceeded"},
+      {real:false, tag:"server reply", scn:"giaddr not one of ours",                       act:"drop", verdict:"discard — no matching interface"},
+      {real:true, attack:true, tag:"⚠ Option-82 spoof", scn:"rogue client · forged relay-agent option", act:"drop", verdict:"discard — client-injected Option 82 (registration spoof) · RFC 3046 §2.1 MUST"},
+      {real:true, attack:true, tag:"⚠ rogue reply",     scn:"fake server · unsolicited OFFER · giaddr 0", act:"drop", verdict:"discard — not for a relay (giaddr 0)"},
+      {real:true, attack:true, tag:"⚠ bad checksum",    scn:"corrupted UDP checksum · scanner/fuzzer",   act:"drop", verdict:"rejected at validation — bad UDP checksum, before relay logic"},
+    ],
+    // held-out extrapolation, digit representation (verbatim per-hop from the experiment)
+    hops: [
+      {inn:24, exp:25, got:"25", ok:true},
+      {inn:25, exp:26, got:"26", ok:true},
+      {inn:26, exp:27, got:"27", ok:true},
+      {inn:27, exp:28, got:"28", ok:true},
+      {inn:28, exp:29, got:"29", ok:true},
+      {inn:29, exp:30, got:"20", ok:false},
+      {inn:30, exp:31, got:"11", ok:false},
+      {inn:31, exp:32, got:"12", ok:false},
+    ],
+    // the fixed decision set (form -> verdict), forward = green, discard = red
+    catalog: [
+      ["client · giaddr 0",            "set giaddr, add Option 82, unicast to server", true],
+      ["client · giaddr already set",  "keep giaddr, increment hops, forward",         true],
+      ["reply · unicast",              "strip Option 82, unicast to client",           true],
+      ["reply · broadcast flag / no addr", "strip Option 82, broadcast to client",     true],
+      ["reply · DHCPNAK",              "broadcast DHCPNAK to client",                  true],
+      ["client · hops over threshold", "discard — hop count exceeded",                 false],
+      ["client · a server reply arrives here", "discard — not a client message",       false],
+      ["reply · giaddr 0",             "discard — not for this relay",                 false],
+      ["reply · giaddr not ours",      "discard — no matching interface",              false],
+      ["reply · a request arrives here", "discard — not a relay reply",                false],
+    ],
+  };
+
+  // ---------- held-out hop grid ----------
+  const hg = document.getElementById('hopgrid');
+  for (const h of RUN.hops) {
+    const d = document.createElement('div');
+    d.className = 'hop ' + (h.ok ? 'ok' : 'no');
+    d.innerHTML = '<span class="in">depth ' + h.inn + ' →</span>' +
+                  '<span class="got">' + h.got + '</span>' +
+                  '<span class="lbl">want ' + h.exp + (h.ok ? '' : ' · missed carry') + '</span>';
+    hg.appendChild(d);
+  }
+
+  // ---------- real-packet table (inside details) ----------
+  const rt = document.getElementById('realtbl');
+  const rtWrap = document.createElement('table'); rtWrap.className = 'grnd';
+  rtWrap.innerHTML = '<tr><th>Real packet</th><th>Parsed as</th><th>Model verdict</th></tr>';
+  for (const p of RUN.packets.filter(p => p.real)) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td class="rfc">' + p.tag + '</td><td class="st" style="white-space:normal">' + p.scn + '</td>' +
+      '<td style="color:' + (p.act === 'fwd' ? 'var(--ok)' : 'var(--bad)') + '">' + p.verdict + '</td>';
+    rtWrap.appendChild(tr);
+  }
+  rt.appendChild(rtWrap);
+
+  // ---------- decision catalog ----------
+  const catEl = document.getElementById('catalog');
+  for (const [form, verdict, fwd] of RUN.catalog) {
+    const a = document.createElement('div'); a.className = 'frm' + (fwd ? '' : ' drop'); a.textContent = form;
+    const b = document.createElement('div'); b.className = 'd'; b.textContent = verdict;
+    catEl.appendChild(a); catEl.appendChild(b);
+  }
+
+  document.getElementById('stamp').textContent = RUN.recorded;
+
+  // ---------- live relay monitor ----------
+  let speed = 1, playing = false;
+  const streamEl = document.getElementById('stream');
+  const playBtn = document.getElementById('playBtn');
+  const speedBtn = document.getElementById('speedBtn');
+  const clockEl = document.getElementById('clock');
+  let nFwd = 0, nDrop = 0, nAtk = 0;
+
+  speedBtn.onclick = () => { speed = speed === 1 ? 4 : 1; speedBtn.textContent = 'speed ' + speed + '×'; };
+
+  function reset() {
+    streamEl.innerHTML = ''; nFwd = nDrop = nAtk = 0;
+    document.getElementById('cFwd').textContent = '0';
+    document.getElementById('cDrop').textContent = '0';
+    document.getElementById('cAtk').textContent = '0';
+  }
+
+  function emit(p) {
+    const row = document.createElement('div');
+    row.className = 'row ' + p.act + (p.attack ? ' attack' : '') + ' flash';
+    const dot = p.attack ? '<span class="atk">⚠ probe</span>'
+              : p.real ? '<span class="real">● real</span>' : '<span class="spec">● spec</span>';
+    row.innerHTML =
+      '<span class="rtag">' + dot + '</span>' +
+      '<span class="rscn"><strong style="color:var(--text)">' + p.tag + '</strong> &nbsp;<span class="arrow">·</span> ' + p.scn + '</span>' +
+      '<span class="rverdict">' + (p.act === 'fwd' ? '→ ' : '✕ ') + p.verdict + '</span>';
+    streamEl.appendChild(row);
+    streamEl.scrollTop = streamEl.scrollHeight;
+    if (p.act === 'fwd') nFwd++; else nDrop++;
+    if (p.attack) { nAtk++; document.getElementById('cAtk').textContent = nAtk; }
+    document.getElementById('cFwd').textContent = nFwd;
+    document.getElementById('cDrop').textContent = nDrop;
+  }
+
+  playBtn.onclick = () => {
+    if (playing) return;
+    playing = true; playBtn.disabled = true; playBtn.textContent = '▶ running…';
+    reset();
+    const gap = 620 / speed;
+    let i = 0;
+    (function step() {
+      if (i >= RUN.packets.length) {
+        clockEl.textContent = 'done · ' + nFwd + ' forwarded · ' + nDrop + ' discarded';
+        playing = false; playBtn.disabled = false; playBtn.textContent = '▶ Replay the monitor';
+        return;
+      }
+      emit(RUN.packets[i]); i++;
+      clockEl.textContent = 'packet ' + i + ' / ' + RUN.packets.length;
+      setTimeout(step, gap);
+    })();
+  };
+  </script>
+</body>
+</html>
