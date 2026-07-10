@@ -18,6 +18,9 @@ Newest on top. Latest entry supersedes older ones where they conflict.
   headless-Chrome render confirms branding/layout.
 - **STATUS: committed locally on `main`, NOT pushed.** To deploy: `git pull --rebase origin main`,
   push, then `./tools/verify_live.sh 1.3.7` must PASS (per CLAUDE.md). Awaiting permissions to push.
+- **NEXT SPRINT:** (1) bring back per-frame **µsec** timing on the CAN verdicts (measured, like the
+  SAT page's `[8 µs]` + QNX/BeaglePlay hardware exhibits); (2) **cross-link** the SAT demo and this
+  CAN demo to each other.
 
 ## 2026-07-09 — Basic /demos page added (CAN Studio + The SAT Challenge)
 
