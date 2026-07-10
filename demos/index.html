@@ -43,7 +43,7 @@
           <p class="eyebrow">Demos</p>
           <h2>See it work</h2>
           <p class="section__sub">
-            Three demonstrations of provable, deterministic AI — software that shows its work
+            Four demonstrations of provable, deterministic AI — software that shows its work
             instead of asking you to trust it. Request a walkthrough and we'll run any of them live.
           </p>
         </header>
@@ -86,6 +86,19 @@
               every case, seen or not — and it runs on real packets from a VM booting locally.
             </p>
             <p><a class="btn btn--small" href="dhcp/">Try the demo</a></p>
+          </article>
+
+          <!-- Demo 4 — HTTP request smuggling -->
+          <article class="card card--pillar">
+            <div class="card__icon" aria-hidden="true">⧗</div>
+            <h3>The Queue Granite Can't Clear — HTTP request smuggling</h3>
+            <p>
+              A request carrying both a Transfer-Encoding and a Content-Length header is the textbook
+              request-smuggling setup (RFC 9112 §6.3) — Vulcan proves it in 2.8 microseconds, citing the
+              exact clause. A live comparison against a local LLM shows the same question taking over two
+              seconds, a backlog that only grows at real traffic rates.
+            </p>
+            <p><a class="btn btn--small" href="http11/">Try the demo</a></p>
           </article>
         </div>
       </div>

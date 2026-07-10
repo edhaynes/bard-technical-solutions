@@ -2,6 +2,22 @@
 
 Newest on top. Latest entry supersedes older ones where they conflict.
 
+## 2026-07-10 — 4th demo added: HTTP request-smuggling ("The Queue Granite Can't Clear") — v1.3.12
+
+- Eddie built a local live demo (Python/SSE, port 7930, private `alpha` repo) of the deontic
+  RFC-conformance oracle expansion proving HTTP/1.1 request-smuggling setups (RFC 9112 §6.3 item
+  3) in microseconds, with a live Vulcan-vs-Granite comparison and a real measured single-core
+  throughput number (~1.2M decisions/sec avg). Liked it, said "replace demos with that on
+  google" — read as: add it as a public static demo on bardtek.com (the site's domain is
+  registered via Google Cloud Domains), matching the existing can/sat/dhcp pattern.
+- New `demos/http11/index.html`: scripted replay (static, no backend — GitHub Pages can't run
+  Python) of a real recorded run, dated 2026-07-10. Real measured numbers baked in verbatim: 2.8µs
+  Vulcan vs. 2.1s Granite (~760,000x), throughput worst/best/avg (279k / 1.4M / ~1.2M per sec).
+  Added as a 4th card on `demos/index.html` (did not remove/replace can, sat, or dhcp — additive
+  only, per the destructive-action confirmation rule). Cross-linked from the dhcp demo's existing
+  "Companion demos" footer.
+- Verified live at v1.3.12.
+
 ## 2026-07-10 — DHCP demo copy fix: "big models memorize, Vulcan learns" — v1.3.11
 
 - Eddie flagged the DHCP demo ("The 100% That Wasn't") copy: "proved it memorized instead of

@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Queue Granite Can't Clear — HTTP request smuggling, proven in real time · Bard Technical Solutions</title>
+  <meta name="description" content="A tiny deterministic oracle proves an HTTP/1.1 request-smuggling setup in microseconds, citing RFC 9112 §6.3 by name — while a live LLM comparison shows why routing real-time traffic through a language model doesn't scale." />
+  <meta name="theme-color" content="#0a1020" />
+  <link rel="icon" href="../../assets/favicon.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="../../styles.css" />
+  <style>
+    /* HTTP/1.1 smuggling demo — brand-token-scoped interactive styles (shared idiom with CAN/DHCP) */
+    :root {
+      --mono: ui-monospace, SFMono-Regular, Menlo, "Cascadia Code", monospace;
+      --ok: #6fcf97; --bad: #e5675f; --rule: var(--gold-300);
+    }
+    .ht-hero { padding-block: clamp(2.6rem, 6vw, 4.2rem); }
+    .ht-hero h1 { font-size: clamp(1.8rem, 4.2vw, 3rem); letter-spacing: -0.02em; max-width: 22ch; }
+    .ht-hero .ht-lede { color: var(--text-muted); font-size: clamp(1.02rem, 1.8vw, 1.2rem); max-width: 62ch; margin-top: 1rem; }
+
+    .ht-controls { display: flex; gap: 0.8rem; align-items: center; flex-wrap: wrap; margin: 1.4rem 0 0.6rem; }
+    .ht-clock { font: 0.85rem var(--mono); color: var(--text-faint); }
+
+    .monitor { border: 1px solid var(--border); border-radius: var(--radius); background: var(--navy-800); overflow: hidden; box-shadow: var(--shadow); }
+    .monhead { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;
+               padding: 0.8rem 1.1rem; background: rgba(255,255,255,0.03); border-bottom: 1px solid var(--border); }
+    .monhead .lanename { font-weight: 600; font-size: 0.95rem; }
+    .monhead .lanename small { color: var(--text-faint); font-weight: 400; margin-left: 0.5rem; }
+    .stat { font: 0.82rem var(--mono); color: var(--text-muted); }
+    .stat b { font-variant-numeric: tabular-nums; }
+    .stat b.ok { color: var(--ok); } .stat b.bad { color: var(--bad); }
+
+    .stream { max-height: 340px; overflow-y: auto; padding: 0.4rem 0; }
+    .row { display: grid; grid-template-columns: 108px 1fr; gap: 0.7rem; align-items: baseline;
+           padding: 0.5rem 1.1rem; font: 0.8rem/1.5 var(--mono); border-left: 3px solid transparent; }
+    .row .rtag { font-size: 0.72rem; }
+    .row .rscn { color: var(--text-muted); }
+    .row .rverdict { font-weight: 600; margin-top: 0.15rem; grid-column: 2; }
+    .row.ok-row { border-left-color: rgba(111,207,151,0.5); }
+    .row.ok-row .rverdict { color: var(--ok); }
+    .row.anomaly { border-left-color: var(--bad); background: rgba(229,103,95,0.07); }
+    .row.anomaly .rverdict { color: var(--bad); }
+    .row.flash { animation: htflash 0.9s ease-out; }
+    @keyframes htflash { from { background: rgba(148,163,184,0.22); } to { background: transparent; } }
+    .row .arrow { color: var(--text-faint); }
+
+    .versus { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border);
+              border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-top: 1rem; }
+    .vs-col { padding: 1.1rem 1.2rem; background: var(--surface); }
+    .vs-col.win { background: rgba(111,207,151,0.06); }
+    .vs-label { font: 0.72rem var(--mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 0.7rem; }
+    .vs-col.win .vs-label { color: var(--ok); }
+    .vs-num { font-family: var(--font-display); font-weight: 700; font-size: clamp(1.3rem, 3vw, 1.9rem); color: var(--text-muted); }
+    .vs-col.win .vs-num { color: var(--ok); }
+    .vs-sub { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.6rem; }
+    @media (max-width: 620px) { .versus { grid-template-columns: 1fr; } }
+
+    .callout { margin-top: 1.4rem; border: 1px solid var(--bad); border-radius: var(--radius);
+               padding: 1.2rem 1.3rem; background: rgba(229,103,95,0.06); }
+    .callout .k { font: 0.72rem var(--mono); color: var(--bad); letter-spacing: 0.12em; text-transform: uppercase; }
+    .callout .big { font-size: 1.15rem; font-family: var(--font-display); margin: 0.4rem 0 0.2rem; }
+    .callout p { color: var(--text-muted); font-size: 0.95rem; margin-top: 0.5rem; }
+    .callout.gold { border-color: var(--rule); background: rgba(212,175,90,0.06); }
+    .callout.gold .k { color: var(--rule); }
+
+    details.ht-det { border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface);
+                     margin-top: 1rem; padding: 0 1.2rem; }
+    details.ht-det > summary { cursor: pointer; padding: 1rem 0; font-family: var(--font-display); font-weight: 600;
+                               font-size: 1.02rem; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+    details.ht-det > summary::-webkit-details-marker { display: none; }
+    details.ht-det > summary::after { content: "＋"; color: var(--accent); font-weight: 400; }
+    details.ht-det[open] > summary::after { content: "－"; }
+    details.ht-det .det-body { padding-bottom: 1.2rem; }
+    details.ht-det .det-body p { color: var(--text-muted); font-size: 0.95rem; margin-top: 0.6rem; }
+
+    table.grnd { width: 100%; border-collapse: collapse; font-size: 0.86rem; margin-top: 0.5rem; }
+    table.grnd th, table.grnd td { text-align: left; padding: 0.45rem 0.5rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    table.grnd th { font: 0.72rem var(--mono); color: var(--text-faint); letter-spacing: 0.06em; text-transform: uppercase; }
+    table.grnd td.rfc { font: 0.82rem var(--mono); color: var(--rule); white-space: nowrap; }
+    table.grnd td.st { font: 0.78rem var(--mono); color: var(--text-faint); white-space: nowrap; }
+    .catalog { display: grid; grid-template-columns: 230px 1fr; gap: 0.4rem 1rem; font-size: 0.9rem; margin-top: 0.6rem; }
+    @media (max-width: 560px) { .catalog { grid-template-columns: 1fr; gap: 0.1rem 0; } .catalog .frm { margin-top: 0.5rem; } }
+    .catalog .frm { font: 0.8rem var(--mono); color: var(--ok); }
+    .catalog .frm.err { color: var(--bad); }
+    .catalog .d { color: var(--text-muted); }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- ============ Header / Nav ============ -->
+  <header class="site-header" id="top">
+    <div class="container nav">
+      <a class="brand" href="../../" aria-label="Bard Technical Solutions home">
+        <img class="brand__mark" src="../../assets/owl.png" width="99" height="120" alt="" aria-hidden="true" />
+        <span class="brand__text">
+          Bard<span class="brand__accent"> Technical Solutions</span>
+        </span>
+      </a>
+      <nav id="nav-menu" class="nav__menu" aria-label="Primary">
+        <a href="../">Demos</a>
+        <a href="../../#approach">Approach</a>
+        <a class="btn btn--small" href="../../#contact">Get in touch</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- ============ Hero ============ -->
+    <section class="section ht-hero">
+      <div class="container">
+        <p class="eyebrow">A live security decision, proven not guessed</p>
+        <h1>The queue Granite can't clear — HTTP request smuggling, caught in 2.8 microseconds.</h1>
+        <p class="ht-lede">
+          A request carrying <strong>both</strong> a <code>Transfer-Encoding</code> and a
+          <code>Content-Length</code> header is the textbook request-smuggling setup — RFC&nbsp;9112
+          §6.3 item 3 names it outright. Vulcan's oracle proves the verdict deterministically, citing
+          the exact clause, in microseconds. Watch it run below on a live-scripted traffic feed, then
+          see why routing that same traffic through a language model doesn't scale: the same question,
+          asked of a local Granite model, takes over two seconds — a backlog that only grows.
+        </p>
+
+        <div class="ht-controls">
+          <button class="btn" id="playBtn">▶ Run the traffic monitor</button>
+          <button class="btn btn--ghost btn--small" id="speedBtn">speed 1×</button>
+          <span class="ht-clock" id="clock"></span>
+        </div>
+
+        <div class="monitor">
+          <div class="monhead">
+            <span class="lanename">HTTP/1.1 framing decision · verdict per message <small>RFC 9112 §6.3 / §9.3</small></span>
+            <span class="stat">
+              <b class="ok" id="cNorm">0</b> normal ·
+              <b class="bad" id="cAnom">0</b> anomaly caught
+            </span>
+          </div>
+          <div class="stream" id="stream"></div>
+        </div>
+        <p class="ht-lede" style="font-size:0.9rem; margin-top:0.8rem">
+          A scripted replay of a real, measured run (recorded <span id="stamp"></span>) — every verdict
+          shown is the oracle's actual output on this machine, not invented for the page.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============ Vulcan vs LLM ============ -->
+    <section class="section section--alt">
+      <div class="container">
+        <div class="section__head" style="text-align:left; max-width:none; margin-bottom:1.2rem">
+          <p class="eyebrow">Same question, same machine</p>
+          <h2>Vulcan vs. a local LLM — measured, not estimated</h2>
+          <p class="section__sub" style="max-width:66ch">
+            We asked a local Granite 2B model (via Ollama) the identical smuggling question Vulcan
+            answers instantly. Same hardware, same prompt, deterministic decoding on both sides.
+          </p>
+        </div>
+
+        <div class="versus">
+          <div class="vs-col win">
+            <div class="vs-label">Vulcan</div>
+            <div class="vs-num">2.8 microseconds</div>
+            <div class="vs-sub">Deterministic — the same verdict, every single time. Cites RFC 9112 §6.3
+              item 3 by name.</div>
+          </div>
+          <div class="vs-col">
+            <div class="vs-label">Granite 2B (local LLM)</div>
+            <div class="vs-num">2.1 seconds</div>
+            <div class="vs-sub">A free-text answer, graded by inspection — not a certified verdict.
+              ~760,000× slower on this run.</div>
+          </div>
+        </div>
+
+        <div class="callout gold">
+          <div class="k">Measured throughput — single core, pure Python</div>
+          <div class="big">~1.2 million decisions/sec, average</div>
+          <p>
+            Sampled over 500,000 real decision calls on one core (Apple M5 Max, no threads, no GPU):
+            <strong>worst 279,000/sec</strong>, <strong>best 1.4 million/sec</strong>, average ~1.2
+            million/sec — reported worst-case first, not just the flattering number. Honest scope: this
+            is the decision step alone, not a full packet/wire parser.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Live stream backlog ============ -->
+    <section class="section">
+      <div class="container">
+        <div class="section__head" style="text-align:left; max-width:none; margin-bottom:1.2rem">
+          <p class="eyebrow">Why this matters at production traffic rates</p>
+          <h2>The queue Granite can't clear</h2>
+          <p class="section__sub" style="max-width:66ch">
+            At a modest 300 requests/sec, Vulcan proves every single one — the backlog never leaves
+            zero. Route that same traffic through the LLM instead, and the math is exact, not
+            hand-waved: Granite completes roughly one verdict for every ~2.1-second slice of wall clock,
+            so the backlog grows by ~299 requests every single second it runs.
+          </p>
+        </div>
+        <div class="versus">
+          <div class="vs-col win">
+            <div class="vs-label">Vulcan — backlog</div>
+            <div class="vs-num">0</div>
+            <div class="vs-sub">Stays at zero indefinitely — decision time is microseconds against a
+              300/sec arrival rate.</div>
+          </div>
+          <div class="vs-col">
+            <div class="vs-label">Routed through Granite instead — backlog after 10 seconds</div>
+            <div class="vs-num" style="color:var(--bad)">~2,990 requests</div>
+            <div class="vs-sub">And climbing, without bound, for as long as traffic keeps arriving
+              faster than one verdict every 2.1 seconds.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Details ============ -->
+    <section class="section section--alt">
+      <div class="container">
+        <div class="section__head" style="text-align:left; max-width:none; margin-bottom:1.2rem">
+          <p class="eyebrow">Details</p>
+          <h2>The spec it proves, the decision set, and how it was built</h2>
+          <p class="section__sub" style="max-width:64ch">
+            No hidden benchmark, no cherry-picked run — the grounding, the decision set, and the
+            provenance are all here. Expand what you want to inspect.
+          </p>
+        </div>
+
+        <details class="ht-det">
+          <summary>The decision set — every verdict the oracle can reach</summary>
+          <div class="det-body">
+            <p>The oracle decides connection persistence and message-body framing for one HTTP/1.1
+            message — five inputs (version, <code>Connection</code>, <code>Transfer-Encoding</code>
+            presence, <code>Content-Length</code> presence, request/response role), seventeen possible
+            verdicts, one of which is a hard rejection:</p>
+            <div class="catalog" id="catalog"></div>
+          </div>
+        </details>
+
+        <details class="ht-det">
+          <summary>Grounding — the published standards, and only those</summary>
+          <div class="det-body">
+            <p>Every decision traces to a published, active IETF standard. No experimental drafts, no
+            invented behavior:</p>
+            <table class="grnd">
+              <tr><th>RFC</th><th>Title</th><th>Status</th><th>Used for</th></tr>
+              <tr><td class="rfc">9110</td><td>HTTP Semantics</td><td class="st">Internet Std (STD 97)</td><td>the <code>Connection</code> header field definition (§7.6.1)</td></tr>
+              <tr><td class="rfc">9112</td><td>HTTP/1.1</td><td class="st">Internet Std (STD 99)</td><td>message-body framing (§6.3) and persistence (§9.3)</td></tr>
+            </table>
+          </div>
+        </details>
+
+        <details class="ht-det">
+          <summary>Scope — what this oracle does NOT cover</summary>
+          <div class="det-body">
+            <p>Deliberately narrow: only connection-persistence and message-framing. It does not cover
+            request methods, routing, status codes in general, caching (RFC 9111), any header beyond
+            <code>Connection</code>/<code>Transfer-Encoding</code>/<code>Content-Length</code>, the
+            HEAD/1xx/204/304 body-suppression cases, CONNECT tunnelling, or chunked-trailer semantics. A
+            full HTTP/1.1 implementation needs all of those; this oracle proves one well-defined,
+            security-relevant slice of it.</p>
+          </div>
+        </details>
+
+        <details class="ht-det">
+          <summary>How it was built</summary>
+          <div class="det-body">
+            <p>A hand-authored decision procedure — pure Python, no model, no training — transcribed
+            directly from the fetched RFC 9112 text (not from memory or a summarizer). It is one part
+            of a larger effort proving the same recipe across eleven RFC families (IPv4, IPv6, TCP,
+            UDP, ICMP, BGP-4, DNS, ARP, HTTP/1.1, TLS 1.3, SMTP). The verdict is a total function: given
+            the five inputs, there is exactly one correct answer, and the oracle always returns it.</p>
+          </div>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ Footer ============ -->
+  <footer class="site-footer">
+    <div class="container footer">
+      <span class="footer__brand">
+        Bard Technical Solutions LLC
+        <small style="display:block;font-weight:500;color:var(--text-faint);">
+          Recorded demonstration · verdicts and timings are real, measured results (Apple M5 Max, one
+          core) from the run recorded <span id="stamp2"></span>; the traffic feed above replays that
+          run.
+          <br><strong>Companion demos:</strong>
+          <a href="/demos/can/" style="color:var(--accent)">CAN Studio — provable vehicle-bus analysis →</a> &nbsp;·&nbsp;
+          <a href="/demos/sat/" style="color:var(--accent)">The SAT Challenge — provable logic vs. frontier models →</a> &nbsp;·&nbsp;
+          <a href="/demos/dhcp/" style="color:var(--accent)">The 100% That Wasn't — a tiny model vs. the DHCP spec →</a>
+        </small>
+      </span>
+      <span class="footer__meta">
+        © <span data-year></span> Bard Technical Solutions LLC. All rights reserved.
+      </span>
+    </div>
+  </footer>
+
+  <script src="../../main.js"></script>
+  <script>
+  // ---------- recorded run (verbatim: real oracle output + real measured latencies, 2026-07-10) ----------
+  const RUN = {
+    recorded: "2026-07-10",
+    messages: [
+      {tag:"POST /login",      scn:"HTTP/1.1 · Content-Length only · keep-alive",         anomaly:false, verdict:"persist connection, framing content_length"},
+      {tag:"POST /upload",     scn:"HTTP/1.1 · chunked, Connection: close",                anomaly:false, verdict:"close connection, framing chunked"},
+      {tag:"GET /status",      scn:"HTTP/1.1 · no body, keep-alive",                       anomaly:false, verdict:"persist connection, framing no_body"},
+      {tag:"POST /login",      scn:"HTTP/1.1 · Content-Length only · keep-alive",          anomaly:false, verdict:"persist connection, framing content_length"},
+      {tag:"⚠ POST /transfer", scn:"Transfer-Encoding AND Content-Length both present",    anomaly:true,  verdict:"REJECT — RFC 9112 §6.3 item 3: request-smuggling risk"},
+      {tag:"POST /upload",     scn:"HTTP/1.1 · chunked, Connection: close",                anomaly:false, verdict:"close connection, framing chunked"},
+      {tag:"GET /status",      scn:"HTTP/1.1 · no body, keep-alive",                       anomaly:false, verdict:"persist connection, framing no_body"},
+      {tag:"POST /login",      scn:"HTTP/1.1 · Content-Length only · keep-alive",          anomaly:false, verdict:"persist connection, framing content_length"},
+      {tag:"POST /upload",     scn:"HTTP/1.1 · chunked, Connection: close",                anomaly:false, verdict:"close connection, framing chunked"},
+    ],
+    // the fixed decision set (form -> verdict), normal = green, rejected = red
+    catalog: [
+      ["Transfer-Encoding + Content-Length both present", "REJECT — request-smuggling risk (§6.3 item 3)", true],
+      ["Transfer-Encoding present (chunked)",              "framing = chunked (§6.3 item 4)",                false],
+      ["Content-Length present, no Transfer-Encoding",     "framing = content_length (§6.3 item 7)",         false],
+      ["Neither present, request",                         "framing = no_body, zero-length (§6.3 item 8)",   false],
+      ["Neither present, response",                         "framing = close_delimited (§6.3 item 9)",       false],
+      ["Connection: close present",                         "connection will NOT persist (§9.3)",            false],
+      ["HTTP/1.1, no close option",                         "connection persists (§9.3)",                    false],
+      ["HTTP/1.0 with keep-alive option",                   "connection persists (§9.3)",                    false],
+      ["HTTP/1.0, no keep-alive option",                    "connection closes by default (§9.3)",           false],
+    ],
+  };
+
+  document.getElementById('stamp').textContent = RUN.recorded;
+  document.getElementById('stamp2').textContent = RUN.recorded;
+
+  // ---------- decision catalog ----------
+  const catEl = document.getElementById('catalog');
+  for (const [form, verdict, err] of RUN.catalog) {
+    const a = document.createElement('div'); a.className = 'frm' + (err ? ' err' : ''); a.textContent = form;
+    const b = document.createElement('div'); b.className = 'd'; b.textContent = verdict;
+    catEl.appendChild(a); catEl.appendChild(b);
+  }
+
+  // ---------- live traffic monitor ----------
+  let speed = 1, playing = false;
+  const streamEl = document.getElementById('stream');
+  const playBtn = document.getElementById('playBtn');
+  const speedBtn = document.getElementById('speedBtn');
+  const clockEl = document.getElementById('clock');
+  let nNorm = 0, nAnom = 0;
+
+  speedBtn.onclick = () => { speed = speed === 1 ? 4 : 1; speedBtn.textContent = 'speed ' + speed + '×'; };
+
+  function reset() {
+    streamEl.innerHTML = ''; nNorm = nAnom = 0;
+    document.getElementById('cNorm').textContent = '0';
+    document.getElementById('cAnom').textContent = '0';
+  }
+
+  function emit(m) {
+    const row = document.createElement('div');
+    row.className = 'row ' + (m.anomaly ? 'anomaly' : 'ok-row') + ' flash';
+    row.innerHTML =
+      '<span class="rtag">' + (m.anomaly ? '<span style="color:var(--bad)">⚠ anomaly</span>' : '<span style="color:var(--rule)">● normal</span>') + '</span>' +
+      '<span class="rscn"><strong style="color:var(--text)">' + m.tag + '</strong> &nbsp;<span class="arrow">·</span> ' + m.scn + '</span>' +
+      '<span class="rverdict">' + (m.anomaly ? '✕ ' : '→ ') + m.verdict + '</span>';
+    streamEl.appendChild(row);
+    streamEl.scrollTop = streamEl.scrollHeight;
+    if (m.anomaly) nAnom++; else nNorm++;
+    document.getElementById('cNorm').textContent = nNorm;
+    document.getElementById('cAnom').textContent = nAnom;
+  }
+
+  playBtn.onclick = () => {
+    if (playing) return;
+    playing = true; playBtn.disabled = true; playBtn.textContent = '▶ running…';
+    reset();
+    const gap = 520 / speed;
+    let i = 0;
+    (function step() {
+      if (i >= RUN.messages.length) {
+        clockEl.textContent = 'done · ' + nNorm + ' normal · ' + nAnom + ' anomaly caught';
+        playing = false; playBtn.disabled = false; playBtn.textContent = '▶ Replay the monitor';
+        return;
+      }
+      emit(RUN.messages[i]); i++;
+      clockEl.textContent = 'message ' + i + ' / ' + RUN.messages.length;
+      setTimeout(step, gap);
+    })();
+  };
+  </script>
+</body>
+</html>
