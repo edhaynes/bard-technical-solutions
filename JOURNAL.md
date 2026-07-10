@@ -2,6 +2,12 @@
 
 Newest on top. Latest entry supersedes older ones where they conflict.
 
+## 2026-07-09 — Cross-linked SAT ↔ CAN demos — v1.3.9
+
+- Backlog #2: the two live demos now point at each other. SAT footer → CAN Studio; CAN footer →
+  SAT Challenge. Makes the pair read as one product (same prove-or-refuse engine, two domains).
+  Bumped `CONFIG.version` 1.3.8 → 1.3.9.
+
 ## 2026-07-09 — CAN Studio: measured µsec timing added — v1.3.8 — DEPLOYED ✓ (verify_live PASS)
 
 - Brought back per-frame microsecond timing on the CAN demo (backlog #1). Numbers are **measured,
