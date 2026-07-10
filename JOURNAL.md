@@ -2,6 +2,15 @@
 
 Newest on top. Latest entry supersedes older ones where they conflict.
 
+## 2026-07-10 — DHCP demo copy fix: "big models memorize, Vulcan learns" — v1.3.11
+
+- Eddie flagged the DHCP demo ("The 100% That Wasn't") copy: "proved it memorized instead of
+  learned" never named Vulcan, so it read as if our own tech had no intelligence — "acts like we
+  have no intelligence." Every remaining "memorize" reference now explicitly names the toy
+  neural net; Vulcan is credited by name as the thing that interprets the spec directly and is
+  correct on cases it's never seen (headline, hero lede, both callouts, the decision-set detail,
+  the build detail, and the `/demos` card copy). Verified live at v1.3.11.
+
 ## 2026-07-09 — Cross-linked SAT ↔ CAN demos — v1.3.9
 
 - Backlog #2: the two live demos now point at each other. SAT footer → CAN Studio; CAN footer →
