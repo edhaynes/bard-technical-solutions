@@ -2,6 +2,22 @@
 
 Newest on top. Latest entry supersedes older ones where they conflict.
 
+## 2026-07-10 — ICD-10-CM demo: complete population (58,066), not a sample — v1.3.15
+
+- Eddie asked for the numbers to be "more accurate." Found the real issue: the CMS source file
+  is sorted by `BENE_ID`, so the earlier n=100 and n=15,000 samples weren't necessarily
+  representative — the category breakdown moved between them as sample size grew
+  (invalid_code 68% → 84.78%). Fix: run the complete population, all 58,066 real claims in
+  the file, eliminating the sampling question outright ("58,066 is better" — Eddie).
+- **Updated headline: 2.12% conformant** (was 1%, n=100), **84.42%** missing 7th-character
+  extension (was 68%), **6.92%** Excludes1 conflicts (was 21%), **6.54%** Code-First gaps
+  (was 10%). Latency essentially unchanged from n=15,000 (avg 82.6µs vs 84.8µs) — only the
+  category breakdown needed the full population; timing was already stable at 15k.
+- Updated meta description, hero lede, the real-data callout, grounding table, "how it was
+  built," and "scope" sections throughout — every occurrence of "100 real claims" / "1%"
+  replaced with "all 58,066" / "2.12%". Validated: HTML tags balanced, JS `node --check`
+  passes.
+
 ## 2026-07-10 — ICD-10-CM demo: swapped hand-built examples for real CMS claims — v1.3.14
 
 - Eddie: the demo's hand-built single/double-code records were "trivial" and asked for

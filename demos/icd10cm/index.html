@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>The Diabetes Trap — Medicare diagnosis coding, proven against 46,881 codes · Bard Technical Solutions</title>
-  <meta name="description" content="A deterministic oracle proves ICD-10-CM claim conformance — Excludes1 conflicts, Code-First sequencing, 7th-character validity — against the real, 2,069-page CDC/NCHS Tabular List. Run against 100 real CMS synthetic Medicare claims, only 1% came back clean." />
+  <meta name="description" content="A deterministic oracle proves ICD-10-CM claim conformance — Excludes1 conflicts, Code-First sequencing, 7th-character validity — against the real, 2,069-page CDC/NCHS Tabular List. Run against all 58,066 real CMS synthetic Medicare claims in the file, only 2.12% came back clean." />
   <meta name="theme-color" content="#0a1020" />
   <link rel="icon" href="../../assets/favicon.png" type="image/png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -123,8 +123,9 @@
           other, no diagnosis filed without the underlying condition it requires first. The claims
           below aren't hand-built examples — they're <strong>real records from CMS's own official
           synthetic Medicare claims release</strong> (8,671 fully synthetic beneficiaries, published
-          publicly, no patient data of any kind). Run against 100 of them: only <strong>1%</strong>
-          came back clean.
+          publicly, no patient data of any kind). Run against <strong>all 58,066</strong> real
+          claims in the file — the complete population, not a sample — only
+          <strong>2.12%</strong> came back clean.
         </p>
 
         <div class="ic-controls">
@@ -194,18 +195,20 @@
         </div>
 
         <div class="callout" style="border-color:var(--bad); background:rgba(229,103,95,0.06); margin-top:1rem">
-          <div class="k" style="color:var(--bad)">Run against real government data, not hand-built examples</div>
-          <div class="big">100 real CMS synthetic Medicare claims — only 1% came back clean</div>
+          <div class="k" style="color:var(--bad)">Run against the complete population, not a sample</div>
+          <div class="big">All 58,066 real CMS synthetic Medicare claims — only 2.12% came back clean</div>
           <p>
             CMS publishes its own synthetic Medicare claims release for exactly this kind of
             testing — 8,671 fully synthetic beneficiaries, real inpatient-claim shapes, no patient
-            data. We ran the first 100 real claims through the same oracle above: <strong>68% fail
-            on a missing required 7th-character extension</strong> (one of the most common real
-            coding errors, not a quirk of the sample), <strong>21% are genuine Excludes1
-            conflicts</strong> (spot-checked: Epilepsy vs. Unspecified convulsions — a real,
-            clinically sensible rule, the symptom is subsumed by the diagnosis),
-            <strong>10% are Code-First sequencing gaps</strong>, and only <strong>1%</strong> pass
-            every check. Reported as measured, not smoothed into a friendlier number.
+            data. The source file is sorted by beneficiary, so a partial sample skews — we ran
+            every one of the 58,066 real claims in it through the same oracle above:
+            <strong>84.42% fail on a missing required 7th-character extension</strong> (one of the
+            most common real coding errors, not a quirk of the sample), <strong>6.92% are genuine
+            Excludes1 conflicts</strong> (spot-checked: Epilepsy vs. Unspecified convulsions — a
+            real, clinically sensible rule, the symptom is subsumed by the diagnosis),
+            <strong>6.54% are Code-First sequencing gaps</strong>, and only
+            <strong>2.12%</strong> pass every check. Reported as measured, not smoothed into a
+            friendlier number.
           </p>
         </div>
       </div>
@@ -274,7 +277,7 @@
               <tr><th>Source</th><th>Coverage</th><th>Status</th><th>Used for</th></tr>
               <tr><td class="rfc">FY2026 Tabular List</td><td>2025-10-01 – 2026-09-30</td><td class="st">In force now</td><td>46,881 codes parsed; the rule set every claim is proved against</td></tr>
               <tr><td class="rfc">FY2027 Tabular List</td><td>2026-10-01 – 2027-09-30</td><td class="st">Published, not yet in force</td><td>47,025 codes parsed; same pipeline, cross-checked</td></tr>
-              <tr><td class="rfc">CMS Synthetic Medicare Claims PUF</td><td>8,671 beneficiaries, 2015-2023</td><td class="st">Publicly released</td><td>the 100 real claims this demo's live monitor replays</td></tr>
+              <tr><td class="rfc">CMS Synthetic Medicare Claims PUF</td><td>8,671 beneficiaries, 2015-2023</td><td class="st">Publicly released</td><td>all 58,066 real claims scored; a handful replay in the live monitor</td></tr>
             </table>
           </div>
         </details>
@@ -287,12 +290,15 @@
             Code notes are informational only (per the real ICD-10-CM convention, both codes MAY
             coexist), so they never fail a claim here. It does not cover CPT/HCPCS procedure codes,
             medical-necessity or MEAT-criteria judgment, or National Correct Coding Initiative
-            edits. Two different kinds of testing back this page: a <strong>self-consistency
-            measure</strong> against the parsed rule set itself (does the oracle correctly re-derive
-            the verdict the source data already encodes, at scale — 99.93% over 1,500 sampled
-            claims), and the <strong>real-claims run above</strong> (100 actual CMS synthetic
-            Medicare claims, 1% clean). Neither is yet an external validation against an independent
-            certified coder's judgment — that's the next step, not a claim already made.</p>
+            edits. Two different kinds of testing back this page, and they measure different
+            things: a <strong>self-consistency measure</strong> against the parsed rule set itself
+            (does the oracle correctly re-derive the verdict the source data already encodes, at
+            scale — 99.93% over 1,500 self-generated claims), and the <strong>real-claims run
+            above</strong> (all 58,066 actual CMS synthetic Medicare claims in the file, 2.12%
+            clean). The gap between those two numbers is the point — self-consistency alone would
+            have hidden how often real claim shapes trip the same rules. Neither is yet an external
+            validation against an independent certified coder's judgment — that's the next step,
+            not a claim already made.</p>
           </div>
         </details>
 
@@ -307,9 +313,11 @@
             the same decision procedure the other Vulcan demos use renders the verdict — never a
             bare if-check. Measured against 1,500 claims sampled directly from the real FY2026
             registry (300 per category, five categories): 99.93% self-consistent. Then measured
-            again against 100 real claims from CMS's public synthetic Medicare release — diagnosis
-            codes there have the decimal point stripped (<code>E119</code> for <code>E11.9</code>),
-            reinserted before proving.</p>
+            again against the complete population of CMS's public synthetic Medicare release —
+            every one of the 58,066 real claims in the file, not a sample of it (an early partial
+            sample skewed, since the file is sorted by beneficiary). Diagnosis codes there have
+            the decimal point stripped (<code>E119</code> for <code>E11.9</code>), reinserted
+            before proving. Average 82.6µs per claim, ≈12,100 claims/sec, single core.</p>
           </div>
         </details>
       </div>
