@@ -2,6 +2,29 @@
 
 Newest on top. Latest entry supersedes older ones where they conflict.
 
+## 2026-07-10 — 5th demo added: ICD-10-CM claim conformance ("The Diabetes Trap") — v1.3.13
+
+- New `demos/icd10cm/index.html`: Vulcan proves Medicare/ICD-10-CM diagnosis-claim conformance
+  against the real, 2,069-page CDC/NCHS FY2026 Tabular List (46,881 codes parsed, 23,414
+  billable, 12,929 requiring a 7th-character extension). Flagship reveal is a real, well-known
+  coding trap: Type 1 (E10.9) and Type 2 (E11.9) diabetes can never be coded together — the
+  spec's own Excludes1 note rules it out — plus a Code-First sequencing example (E08.9 needs its
+  underlying condition, e.g. E24.0 Cushing's disease, coded first) and a 7th-character extension
+  validity check (S06.0X0 vs S06.0X0A).
+- All verdicts and timings are real, measured output from the private `alpha` repo's
+  `vulcan.demos.icd10cm_claim.ClaimConformance` prover (built this session on branch
+  `spikes/icd10-cm-coding`) against the parsed FY2026 registry — not invented for the page.
+  Measured latency: worst 25.6µs / avg 9.7µs / best 7.7µs / p99 13.5µs over 20,000 `prove()`
+  calls, Apple M5 Max single core, CPython 3.14.4. Scoring-harness self-consistency: 99.93% over
+  1,500 sampled claims (300/category × 5 categories) — stated honestly as self-consistency
+  against the parsed registry, not yet external validation against an independent coder.
+- No patient data anywhere, real or synthetic-identifying — a claim is a bare tuple of diagnosis
+  codes. Added as a 5th card on `demos/index.html` (additive only, per the destructive-action
+  confirmation rule); cross-linked from/to the dhcp and http11 companion-demos footers. `can`/
+  `sat` footers left on their older single-companion pattern (pre-existing, out of scope here).
+- Validated: HTML tags balanced, JS `node --check` passes, headless-Chrome render confirms the
+  hero/catalog content and no console errors.
+
 ## 2026-07-10 — 4th demo added: HTTP request-smuggling ("The Queue Granite Can't Clear") — v1.3.12
 
 - Eddie built a local live demo (Python/SSE, port 7930, private `alpha` repo) of the deontic
