@@ -2,7 +2,7 @@
 
 Newest on top. Latest entry supersedes older ones where they conflict.
 
-## 2026-07-09 — CAN Studio demo built (live capture page) — v1.3.7 — LOCAL COMMIT, NOT YET DEPLOYED
+## 2026-07-09 — CAN Studio demo built (live capture page) — v1.3.7 — DEPLOYED ✓ (verify_live PASS)
 
 - Built `demos/can/index.html`: an interactive CAN Studio demo modeled on the SAT page but
   **rebranded to the main site** (navy/gold, `../../styles.css`, Inter/Sora, site header/footer)
@@ -16,8 +16,9 @@ Newest on top. Latest entry supersedes older ones where they conflict.
 - Wired the `/demos` CAN Studio card from "Request this demo" → `can/` ("Try the demo").
 - Bumped `CONFIG.version` 1.3.6 → 1.3.7. Validated: HTML tags balanced, JS `node --check` passes,
   headless-Chrome render confirms branding/layout.
-- **STATUS: committed locally on `main`, NOT pushed.** To deploy: `git pull --rebase origin main`,
-  push, then `./tools/verify_live.sh 1.3.7` must PASS (per CLAUDE.md). Awaiting permissions to push.
+- **STATUS: DEPLOYED.** Pushed `fd21ed3` to `main`; Pages built it in ~30s; `./tools/verify_live.sh 1.3.7`
+  prints PASS (v1.3.7 live, 5 assets byte-identical, no flying owl); `bardtek.com/demos/can/` serves 200.
+  Secret gate clean (gitleaks, 0 leaks over the push range).
 - **NEXT SPRINT:** (1) bring back per-frame **µsec** timing on the CAN verdicts (measured, like the
   SAT page's `[8 µs]` + QNX/BeaglePlay hardware exhibits); (2) **cross-link** the SAT demo and this
   CAN demo to each other.
