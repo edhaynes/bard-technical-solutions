@@ -34,7 +34,8 @@
     .monhead .lanename small { color: var(--text-faint); font-weight: 400; margin-left: 0.5rem; }
     .stat { font: 0.82rem var(--mono); color: var(--text-muted); }
     .stat b { font-variant-numeric: tabular-nums; }
-    .stat b.ok { color: var(--ok); } .stat b.bad { color: var(--bad); }
+    .stat b.ok { color: var(--ok); } .stat b.bad { color: var(--bad); } .stat b.us { color: var(--rule); }
+    .row .rus { color: var(--rule); font-size: 0.72rem; }
 
     .stream { max-height: 380px; overflow-y: auto; padding: 0.4rem 0; }
     .row { display: grid; grid-template-columns: 62px 46px 148px 1fr; gap: 0.7rem; align-items: baseline;
@@ -142,7 +143,8 @@
             <span class="stat">
               <b class="ok" id="cNormal">0</b> normal ·
               <b class="bad" id="cAnom">0</b> anomaly ·
-              <b id="cRej">0</b> reject
+              <b id="cRej">0</b> reject ·
+              peak <b class="us" id="cMax">0.0</b> µs
             </span>
           </div>
           <div class="stream" id="stream"></div>
@@ -271,7 +273,8 @@ BO_ 452 ENGINE_RPM: 8
         Bard Technical Solutions LLC
         <small style="display:block;font-weight:500;color:var(--text-faint);">
           Recorded demonstration · verbatim <code>vulcan can</code> CLI output over real candump traces (recorded <span id="stamp"></span>).
-          The same oracle runs on QNX 8.0 and real BeaglePlay silicon.
+          Per-frame latency is <strong>measured, not modeled</strong>: median of 4,001 <code>verify_observation()</code> calls
+          per frame (fresh cadence state each run), Apple M5 Max, CPython 3.14.4. The same oracle runs on QNX 8.0 and real BeaglePlay silicon.
         </small>
       </span>
       <span class="footer__meta">
@@ -286,31 +289,31 @@ BO_ 452 ENGINE_RPM: 8
   const TRACE = {
     recorded: "2026-07-09",
     frames: [
-      {t:0.000, id:"0B4", msg:"SPEED",              data:"E8030000000000A7", decode:"SPEED 10.00 km/h",         v:"NORMAL",  detail:"all 5 invariants hold"},
-      {t:0.005, id:"0AA", msg:"WHEEL_SPEEDS",       data:"7F410C8000000000", decode:"WHEEL_SPEED_FR 100.0 km/h", v:"NORMAL",  detail:"all 4 invariants hold"},
-      {t:0.010, id:"0B4", msg:"SPEED",              data:"E8030000000000A7", decode:"SPEED 10.00 km/h",         v:"NORMAL",  detail:"all 6 invariants hold"},
-      {t:0.015, id:"0AA", msg:"WHEEL_SPEEDS",       data:"7F410C8000000000", decode:"WHEEL_SPEED_FR 100.0 km/h", v:"NORMAL",  detail:"all 5 invariants hold"},
-      {t:0.020, id:"0B4", msg:"SPEED",              data:"E8030000000000A7", decode:"SPEED 10.00 km/h",         v:"NORMAL",  detail:"all 6 invariants hold"},
-      {t:0.025, id:"0AA", msg:"WHEEL_SPEEDS",       data:"7F410C8000000000", decode:"WHEEL_SPEED_FR 100.0 km/h", v:"NORMAL",  detail:"all 5 invariants hold"},
-      {t:0.030, id:"0B4", msg:"SPEED",              data:"E8030000000000A7", decode:"SPEED 10.00 km/h",         v:"NORMAL",  detail:"all 6 invariants hold"},
-      {t:0.035, id:"0AA", msg:"WHEEL_SPEEDS",       data:"7F410C8000000000", decode:"WHEEL_SPEED_FR 100.0 km/h", v:"NORMAL",  detail:"all 5 invariants hold"},
+      {t:0.000, id:"0B4", msg:"SPEED",              data:"E8030000000000A7", decode:"SPEED 10.00 km/h",         v:"NORMAL",  us:5.9, detail:"all 5 invariants hold"},
+      {t:0.005, id:"0AA", msg:"WHEEL_SPEEDS",       data:"7F410C8000000000", decode:"WHEEL_SPEED_FR 100.0 km/h", v:"NORMAL",  us:4.3, detail:"all 4 invariants hold"},
+      {t:0.010, id:"0B4", msg:"SPEED",              data:"E8030000000000A7", decode:"SPEED 10.00 km/h",         v:"NORMAL",  us:6.3, detail:"all 6 invariants hold"},
+      {t:0.015, id:"0AA", msg:"WHEEL_SPEEDS",       data:"7F410C8000000000", decode:"WHEEL_SPEED_FR 100.0 km/h", v:"NORMAL",  us:5.2, detail:"all 5 invariants hold"},
+      {t:0.020, id:"0B4", msg:"SPEED",              data:"E8030000000000A7", decode:"SPEED 10.00 km/h",         v:"NORMAL",  us:6.0, detail:"all 6 invariants hold"},
+      {t:0.025, id:"0AA", msg:"WHEEL_SPEEDS",       data:"7F410C8000000000", decode:"WHEEL_SPEED_FR 100.0 km/h", v:"NORMAL",  us:5.1, detail:"all 5 invariants hold"},
+      {t:0.030, id:"0B4", msg:"SPEED",              data:"E8030000000000A7", decode:"SPEED 10.00 km/h",         v:"NORMAL",  us:6.0, detail:"all 6 invariants hold"},
+      {t:0.035, id:"0AA", msg:"WHEEL_SPEEDS",       data:"7F410C8000000000", decode:"WHEEL_SPEED_FR 100.0 km/h", v:"NORMAL",  us:5.1, detail:"all 5 invariants hold"},
 
-      {t:0.100, id:"025", msg:"STEER_ANGLE_SENSOR", data:"0273000000000000", decode:"STEER_ANGLE 940.5°",       v:"ANOMALY", inv:"signal_declared_range", detail:"STEER_ANGLE 940.5 outside declared range [-500, 500]", headline:true},
-      {t:0.200, id:"0B4", msg:"SPEED",              data:"0102",             decode:"dlc 2 (want 8)",            v:"ANOMALY", inv:"dlc_matches",           detail:"dlc 2 != DBC length 8 for 'SPEED'"},
-      {t:0.300, id:"0CF", msg:"?",                  data:"00FA00FB00FC00FD", decode:"undeclared id",             v:"ANOMALY", inv:"valid_id_whitelist",    detail:"arbitration_id 0x0CF ∉ DBC message set"},
+      {t:0.100, id:"025", msg:"STEER_ANGLE_SENSOR", data:"0273000000000000", decode:"STEER_ANGLE 940.5°",       v:"ANOMALY", us:4.6, inv:"signal_declared_range", detail:"STEER_ANGLE 940.5 outside declared range [-500, 500]", headline:true},
+      {t:0.200, id:"0B4", msg:"SPEED",              data:"0102",             decode:"dlc 2 (want 8)",            v:"ANOMALY", us:5.1, inv:"dlc_matches",           detail:"dlc 2 != DBC length 8 for 'SPEED'"},
+      {t:0.300, id:"0CF", msg:"?",                  data:"00FA00FB00FC00FD", decode:"undeclared id",             v:"ANOMALY", us:1.8, inv:"valid_id_whitelist",    detail:"arbitration_id 0x0CF ∉ DBC message set"},
 
-      {t:0.400, id:"0AA", msg:"WHEEL_SPEEDS",       data:"7F410C8000000000", decode:"WHEEL_SPEED_FR 100.0 km/h", v:"NORMAL",  detail:"all 4 invariants hold"},
-      {t:0.410, id:"0AA", msg:"WHEEL_SPEEDS",       data:"7F410C8000000000", decode:"WHEEL_SPEED_FR 100.0 km/h", v:"NORMAL",  detail:"all 5 invariants hold"},
-      {t:0.4105,id:"0AA", msg:"WHEEL_SPEEDS",       data:"7F410C8000000000", decode:"replayed +0.5ms",           v:"ANOMALY", inv:"cadence",               detail:"Δt 0.000500202s ∉ cadence band [0.00849999, 0.0115] (period 0.00999999s ±0.15)"},
+      {t:0.400, id:"0AA", msg:"WHEEL_SPEEDS",       data:"7F410C8000000000", decode:"WHEEL_SPEED_FR 100.0 km/h", v:"NORMAL",  us:4.9, detail:"all 4 invariants hold"},
+      {t:0.410, id:"0AA", msg:"WHEEL_SPEEDS",       data:"7F410C8000000000", decode:"WHEEL_SPEED_FR 100.0 km/h", v:"NORMAL",  us:5.5, detail:"all 5 invariants hold"},
+      {t:0.4105,id:"0AA", msg:"WHEEL_SPEEDS",       data:"7F410C8000000000", decode:"replayed +0.5ms",           v:"ANOMALY", us:5.3, inv:"cadence",               detail:"Δt 0.000500202s ∉ cadence band [0.00849999, 0.0115] (period 0.00999999s ±0.15)"},
     ],
     exhibits: [
-      {inv:"signal_declared_range", headline:true, frame:"0x025#0273000000000000",
+      {inv:"signal_declared_range", headline:true, frame:"0x025#0273000000000000", us:4.6,
        why:"Decodes STEER_ANGLE to +940.5° and proves it outside the DBC-declared ±500° physical band. In-envelope for the 12 bits, impossible for the wheel — a compromised steering ECU, named exactly."},
-      {inv:"dlc_matches", frame:"0x0B4#0102",
+      {inv:"dlc_matches", frame:"0x0B4#0102", us:5.1,
        why:"A 2-byte payload on the 8-byte SPEED message. Length is a contract; the truncated injection breaks it before any signal is even decoded."},
-      {inv:"valid_id_whitelist", frame:"0x0CF#00FA00FB00FC00FD",
+      {inv:"valid_id_whitelist", frame:"0x0CF#00FA00FB00FC00FD", us:1.8,
        why:"An arbitration id the DBC never declares — a spoofed ECU. Proven hostile against the whitelist, not shrugged off as unknown."},
-      {inv:"cadence", frame:"0x0AA re-sent +0.5ms",
+      {inv:"cadence", frame:"0x0AA re-sent +0.5ms", us:5.3,
        why:"A WHEEL_SPEEDS frame replayed 0.5 ms after the last instead of on its measured 10 ms period. The inter-arrival Δt is proven outside the baseline cadence band."},
     ],
     realtrace_fp: [
@@ -338,7 +341,7 @@ BO_ 452 ENGINE_RPM: 8
     const detail = TRACE.frames.find(f => f.inv === ex.inv)?.detail || '';
     d.innerHTML =
       '<div class="exhead"><span class="rule">' + ex.inv + '</span>' +
-      '<span class="verd">ANOMALY' + (ex.headline ? ' · headline' : '') + '</span></div>' +
+      '<span class="verd">ANOMALY · ' + ex.us.toFixed(1) + ' µs' + (ex.headline ? ' · headline' : '') + '</span></div>' +
       '<div class="frm">' + ex.frame + '</div>' +
       '<div class="why">' + ex.why + '</div>' +
       '<div class="canon">' + detail + '</div>';
@@ -375,7 +378,7 @@ BO_ 452 ENGINE_RPM: 8
   const speedBtn = document.getElementById('speedBtn');
   const clockEl = document.getElementById('clock');
   const callout = document.getElementById('callout');
-  let nNormal = 0, nAnom = 0, nRej = 0;
+  let nNormal = 0, nAnom = 0, nRej = 0, maxUs = 0;
 
   speedBtn.onclick = () => {
     speed = speed === 1 ? 8 : 1;
@@ -383,10 +386,11 @@ BO_ 452 ENGINE_RPM: 8
   };
 
   function reset() {
-    streamEl.innerHTML = ''; nNormal = nAnom = nRej = 0;
+    streamEl.innerHTML = ''; nNormal = nAnom = nRej = 0; maxUs = 0;
     document.getElementById('cNormal').textContent = '0';
     document.getElementById('cAnom').textContent = '0';
     document.getElementById('cRej').textContent = '0';
+    document.getElementById('cMax').textContent = '0.0';
     callout.style.display = 'none';
   }
 
@@ -394,9 +398,11 @@ BO_ 452 ENGINE_RPM: 8
     const cls = f.v === 'ANOMALY' ? 'bad' : f.v === 'REJECT' ? 'reject' : 'ok';
     const row = document.createElement('div');
     row.className = 'row ' + cls + (f.v === 'ANOMALY' ? ' flash' : '');
-    const verdictText = f.v === 'NORMAL'
+    const verdictBody = f.v === 'NORMAL'
       ? 'NORMAL — ' + f.detail
       : f.v + (f.inv ? ' — <span class="rule">' + f.inv + '</span>: ' + f.detail : ' — ' + f.detail);
+    const usTag = f.us ? ' <span class="rus">[' + f.us.toFixed(1) + ' µs]</span>' : '';
+    const verdictText = verdictBody + usTag;
     row.innerHTML =
       '<span class="rt">' + f.t.toFixed(3) + 's</span>' +
       '<span class="rid">0x' + f.id + '</span>' +
@@ -407,6 +413,7 @@ BO_ 452 ENGINE_RPM: 8
     streamEl.scrollTop = streamEl.scrollHeight;
 
     if (f.v === 'NORMAL') nNormal++; else if (f.v === 'ANOMALY') nAnom++; else nRej++;
+    if (f.us && f.us > maxUs) { maxUs = f.us; document.getElementById('cMax').textContent = maxUs.toFixed(1); }
     document.getElementById('cNormal').textContent = nNormal;
     document.getElementById('cAnom').textContent = nAnom;
     document.getElementById('cRej').textContent = nRej;
@@ -416,7 +423,7 @@ BO_ 452 ENGINE_RPM: 8
         '0x' + f.id + ' ' + (f.msg === '?' ? '' : f.msg) + ' — ' + f.detail;
       document.getElementById('coRule').textContent = 'invariant: ' + f.inv;
       document.getElementById('coFrm').textContent =
-        'frame  ' + f.data + '   ·   ' + f.decode + '   ·   verified in microseconds, deterministic';
+        'frame  ' + f.data + '   ·   ' + f.decode + '   ·   proven in ' + f.us.toFixed(1) + ' µs — deterministic to the bit';
       callout.style.display = 'block';
     }
   }

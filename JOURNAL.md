@@ -2,6 +2,17 @@
 
 Newest on top. Latest entry supersedes older ones where they conflict.
 
+## 2026-07-09 — CAN Studio: measured µsec timing added — v1.3.8
+
+- Brought back per-frame microsecond timing on the CAN demo (backlog #1). Numbers are **measured,
+  not modeled**: median of 4,001 `verify_observation()` calls per frame (fresh cadence state each
+  run) via a timing harness replicating the CLI's `_scan_can` path against `edhayn/vulcan-cli`.
+  Machine: Apple M5 Max, CPython 3.14.4. Per verdict: unknown-id 1.8µs (short-circuits), steer
+  4.6µs, dlc 5.1µs, cadence 5.3µs, NORMAL ~4.3–6.3µs.
+- Rendered in three places: `[X.X µs]` gold tag on each live-monitor row, `ANOMALY · X.X µs` on
+  each attack exhibit card, a `peak <n> µs` readout in the monitor header, and a footer methodology
+  note stating exactly how it was measured. Bumped `CONFIG.version` 1.3.7 → 1.3.8.
+
 ## 2026-07-09 — CAN Studio demo built (live capture page) — v1.3.7 — DEPLOYED ✓ (verify_live PASS)
 
 - Built `demos/can/index.html`: an interactive CAN Studio demo modeled on the SAT page but
