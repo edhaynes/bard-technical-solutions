@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>The 100% That Wasn't — a tiny model vs. the DHCP relay spec · Bard Technical Solutions</title>
-  <meta name="description" content="A ~1M-parameter model trained from scratch on the DHCP relay spec scores 100% on every held-out scenario — then a hop it never saw proves it memorized instead of learned. A live illustration of why a confident score is not a proof." />
+  <meta name="description" content="A ~1M-parameter model trained from scratch on the DHCP relay spec scores 100% on every held-out scenario — then a hop it never saw exposes the memorization. Big models memorize; Vulcan interprets the spec directly and is correct on every case, seen or not." />
   <meta name="theme-color" content="#0a1020" />
   <link rel="icon" href="../../assets/favicon.png" type="image/png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -124,14 +124,15 @@
     <section class="section dh-hero">
       <div class="container">
         <p class="eyebrow">A tiny model vs. the DHCP relay spec</p>
-        <h1>It scored 100% on the DHCP relay spec. Then we proved it memorized, not learned.</h1>
+        <h1>It scored 100% on the DHCP relay spec — by memorizing it. Vulcan scores 100% by learning it.</h1>
         <p class="dh-lede">
           We cloned a ~1-million-parameter model and trained it from scratch on the DHCP relay
           decision — RFC&nbsp;1542 and RFC&nbsp;3046, the rules a relay agent follows for every
           packet. It reached a <strong>perfect 100%</strong> on a fresh, held-out battery. Watch it
           run below — on real packets from a VM booting locally — and then watch a single hop it was
-          never shown pull the 100% apart. It's the same lesson our verifiers are built on:
-          <em>a confident score is not a proof.</em>
+          never shown pull the 100% apart. Vulcan runs the same decision the other way: instead of
+          training on examples and hoping the pattern holds, it interprets the spec directly — so it
+          <em>correctly interprets 100% of the spec</em>, including the hop the trained model never saw.
         </p>
 
         <div class="dh-controls">
@@ -207,24 +208,26 @@
           <div class="k" style="color:var(--rule)">The same blind spot — now a security gap</div>
           <div class="big">A hop-exhaustion flood sets hops = 255. The model can't even read it.</div>
           <p>
-            One of our adversarial probes floods the relay with the hop count jammed to 255. The
-            deterministic oracle discards it in a single line — <code>hops&nbsp;&gt;&nbsp;16&nbsp;→&nbsp;discard</code>.
-            The trained model, never shown a hop value that large, emits nonsense
-            (<code>"14 option82 giaddr add option82…"</code>) — the identical out-of-range blind spot
-            from above, this time as a way in. The provable rule catches the attack; the confident
-            model doesn't. That is the whole argument, in one packet.
+            One of our adversarial probes floods the relay with the hop count jammed to 255. Vulcan
+            discards it in a single line — <code>hops&nbsp;&gt;&nbsp;16&nbsp;→&nbsp;discard</code> —
+            because it's applying the rule, not recalling a pattern. The trained model, never shown a
+            hop value that large, emits nonsense (<code>"14 option82 giaddr add option82…"</code>) —
+            the identical out-of-range blind spot from above, this time as a way in. Vulcan catches
+            the attack; the confident model doesn't. That is the whole argument, in one packet.
           </p>
         </div>
 
         <div class="callout">
           <div class="k">Why this matters</div>
-          <div class="big">A perfect score measured coverage, not comprehension.</div>
+          <div class="big">Big models memorize. Vulcan learns the spec.</div>
           <p>
             Nothing was wrong with the model or the training — this is what neural pattern-matching
-            <em>is</em>, even when the headline number is 100%. When the cost of a confident-but-wrong
-            answer is real — a vehicle bus, a safety case, a network that has to behave — you don't
-            want a score you have to trust. You want a verdict that shows the rule it checked. That's
-            what the other two demos do.
+            <em>is</em>, even when the headline number is 100%. Vulcan takes the opposite path: instead
+            of training on examples and hoping the pattern generalizes, it interprets the spec once and
+            applies it — so it correctly interprets 100% of the spec, not just the 100% it happened to
+            be shown. When the cost of a confident-but-wrong answer is real — a vehicle bus, a safety
+            case, a network that has to behave — you don't want a score you have to trust. You want a
+            verdict that shows the rule it checked. That's what the other two demos do.
           </p>
         </div>
       </div>
@@ -262,7 +265,7 @@
           <div class="det-body">
             <p>There is no learned weight quietly deciding an action. The relay's behavior is a fixed
             set of decisions from the spec; the model was trained to reproduce them, and the held-out
-            battery scores it against the same oracle. Ten decisions, both directions:</p>
+            battery scores it against Vulcan's spec oracle. Ten decisions, both directions:</p>
             <div class="catalog" id="catalog"></div>
           </div>
         </details>
@@ -290,7 +293,9 @@
             controlled English and <em>generates</em> the verdict word by word — a generative model,
             graded by exact match against the spec oracle on a freshly-seeded battery it never saw in
             training. The same recipe hits 100% at a tenth the size, which is the whole point of the
-            reveal above: on a fully-enumerable spec, size buys memorization, not understanding.</p>
+            reveal above: on a fully-enumerable spec, size buys memorization, not understanding.
+            Vulcan doesn't need either — it interprets the spec directly, so there's no table to
+            memorize and nothing to buy with more parameters.</p>
           </div>
         </details>
       </div>
