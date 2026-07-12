@@ -11,7 +11,7 @@
  * alias once one is set up. No phone number is included by request.
  */
 const CONFIG = Object.freeze({
-  version: "1.3.17",
+  version: "1.3.18",
   company: "Bard Technical Solutions LLC",
   tagline: "Innovative IT · Engineering · Cybersecurity",
   contact: {
