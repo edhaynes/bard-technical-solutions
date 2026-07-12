@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Team — Bard Technical Solutions LLC</title>
+  <meta
+    name="description"
+    content="The people behind Bard Technical Solutions LLC."
+  />
+  <meta name="theme-color" content="#0b1220" />
+
+  <!-- Open Graph / social preview -->
+  <meta property="og:title" content="Team — Bard Technical Solutions LLC" />
+  <meta
+    property="og:description"
+    content="The people behind Bard Technical Solutions LLC."
+  />
+  <meta property="og:type" content="website" />
+
+  <link rel="icon" href="assets/favicon.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- ============ Header / Nav ============ -->
+  <header class="site-header" id="top">
+    <div class="container nav">
+      <a class="brand" href="index.html" aria-label="Bard Technical Solutions home">
+        <img class="brand__mark" src="assets/owl.png" width="99" height="120" alt="" aria-hidden="true" />
+        <span class="brand__text">
+          Bard<span class="brand__accent"> Technical Solutions</span>
+        </span>
+      </a>
+
+      <button
+        class="nav__toggle"
+        aria-expanded="false"
+        aria-controls="nav-menu"
+        aria-label="Toggle navigation menu"
+      >
+        <span></span><span></span><span></span>
+      </button>
+
+      <nav id="nav-menu" class="nav__menu" aria-label="Primary">
+        <a href="index.html#services">Services</a>
+        <a href="index.html#approach">Approach</a>
+        <a href="demos/">Demos</a>
+        <a href="index.html#about">About</a>
+        <a href="https://bard-portal-877819400319.us-central1.run.app">Client Portal</a>
+        <a class="btn btn--small" href="index.html#contact">Get in touch</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- ============ Team ============ -->
+    <section class="section" id="team">
+      <div class="container">
+        <header class="section__head">
+          <p class="eyebrow">About</p>
+          <h2>The people behind Bard</h2>
+          <p class="section__sub">
+            Senior engineering and advisory talent, brought together to build
+            things that last.
+          </p>
+        </header>
+
+        <div class="grid grid--cards">
+          <article class="card">
+            <h3>Kathryn Haynes</h3>
+            <p>Director of Advanced AI Mathematics</p>
+          </article>
+
+          <article class="card">
+            <h3>Guy Turgeon</h3>
+            <p>Chief Architect</p>
+          </article>
+
+          <article class="card">
+            <h3>Major General Robert Sofge, USMC (ret)</h3>
+            <p>Senior Advisor, Defense</p>
+          </article>
+
+          <article class="card">
+            <h3>Holly McAlpine</h3>
+            <p>VP Marketing</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Contact ============ -->
+    <section class="section section--cta" id="contact">
+      <div class="container cta">
+        <h2>Let's build something.</h2>
+        <p>
+          Tell us what you're working on and we'll get back to you within one
+          business day.
+        </p>
+        <div class="cta__actions">
+          <a class="btn btn--lg" data-contact="email" href="#">Email us</a>
+        </div>
+        <p class="cta__fineprint" data-contact="address"></p>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ Footer ============ -->
+  <footer class="site-footer">
+    <div class="container footer">
+      <span class="footer__brand">
+        Bard Technical Solutions LLC
+        <small style="display:block;font-weight:500;color:var(--text-faint);">Innovative IT · Engineering · Cybersecurity · Cambridge, MA</small>
+      </span>
+      <span class="footer__meta">
+        © <span data-year></span> Bard Technical Solutions LLC. All rights reserved.
+      </span>
+      <span class="footer__version" data-version></span>
+    </div>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+</html>

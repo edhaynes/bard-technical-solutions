@@ -2,6 +2,15 @@
 
 Newest on top. Latest entry supersedes older ones where they conflict.
 
+## 2026-07-12 — Team page added — v1.3.16
+
+- New `team.html`: text-only bio cards (no headshots) for Kathryn Haynes (Director of Advanced
+  AI Mathematics), Guy Turgeon (Chief Architect), Major General Robert Sofge, USMC (ret)
+  (Senior Advisor, Defense), and Holly McAlpine (VP Marketing). Same header/footer chrome as
+  `index.html`, reuses the existing `.card`/`.grid--cards` styles — no new CSS.
+- Added a "Meet the team →" link in the About section of `index.html` pointing to `team.html`.
+  Bumped `CONFIG.version` 1.3.15 → 1.3.16.
+
 ## 2026-07-10 — ICD-10-CM demo: complete population (58,066), not a sample — v1.3.15
 
 - Eddie asked for the numbers to be "more accurate." Found the real issue: the CMS source file
