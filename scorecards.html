@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scorecards — Bard Technical Solutions LLC</title>
+  <meta
+    name="description"
+    content="Measured results for Lithium and Vulcan — hallucination, latency, and reasoning benchmarks. Same model on both sides; the only difference is Vulcan."
+  />
+  <meta name="theme-color" content="#0b1220" />
+
+  <!-- Open Graph / social preview -->
+  <meta property="og:title" content="Scorecards — Bard Technical Solutions LLC" />
+  <meta
+    property="og:description"
+    content="Measured results for Lithium and Vulcan. Same 4B model on both sides; the only difference is Vulcan."
+  />
+  <meta property="og:type" content="website" />
+
+  <link rel="icon" href="assets/favicon.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Scorecard components (scoped to this page; reuses the site's tokens) -->
+  <style>
+    .sc-lead { max-width: 60ch; color: var(--text-muted); }
+    .scorecard {
+      border: 1px solid var(--border); border-radius: var(--radius);
+      background: var(--surface); padding: 1.5rem 1.5rem 1.25rem; margin-bottom: 1.25rem;
+    }
+    .scorecard > .eyebrow { margin: 0 0 .15rem; }
+    .scorecard h3 { margin: 0 0 .25rem; font-family: var(--font-display); }
+    .scorecard .sc-sub { color: var(--text-muted); margin: 0 0 1.1rem; font-size: .95rem; }
+    .sc-versus {
+      display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+      gap: .5rem; margin-bottom: 1rem;
+    }
+    .sc-side { text-align: center; padding: 1rem .75rem; border-radius: var(--radius-sm); }
+    .sc-side--a { background: rgba(224,115,107,.08); border: 1px solid rgba(224,115,107,.28); }
+    .sc-side--b { background: rgba(231,200,120,.09); border: 1px solid rgba(231,200,120,.4); }
+    .sc-n { display: block; font-family: var(--font-display); font-weight: 800;
+      font-size: clamp(2.1rem, 6vw, 3rem); line-height: 1; }
+    .sc-side--a .sc-n { color: #e0736b; }
+    .sc-side--b .sc-n { color: var(--gold-300); }
+    .sc-l { display: block; margin-top: .4rem; font-size: .82rem; color: var(--text-muted); }
+    .sc-side--b .sc-l b { color: var(--gold-300); }
+    .sc-vs { font-family: var(--font-display); color: var(--text-faint); font-weight: 700; }
+    .sc-stats { display: flex; flex-wrap: wrap; gap: .5rem; margin: 0 0 .9rem; }
+    .sc-chip {
+      font-size: .8rem; color: var(--text-muted); background: var(--surface);
+      border: 1px solid var(--border); border-radius: 999px; padding: .3rem .7rem;
+    }
+    .sc-chip b { color: var(--gold-300); }
+    .sc-note { font-size: .86rem; color: var(--text-muted); margin: 0; line-height: 1.55; }
+    .sc-note b { color: var(--text); }
+    .sc-foot { font-size: .74rem; color: var(--text-faint); margin: .5rem 0 0; }
+    .vulcan-mark { color: var(--gold-300); font-weight: 700; }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- ============ Header / Nav ============ -->
+  <header class="site-header" id="top">
+    <div class="container nav">
+      <a class="brand" href="index.html" aria-label="Bard Technical Solutions home">
+        <img class="brand__mark" src="assets/owl.png" width="99" height="120" alt="" aria-hidden="true" />
+        <span class="brand__text">
+          Bard<span class="brand__accent"> Technical Solutions</span>
+        </span>
+      </a>
+
+      <button
+        class="nav__toggle"
+        aria-expanded="false"
+        aria-controls="nav-menu"
+        aria-label="Toggle navigation menu"
+      >
+        <span></span><span></span><span></span>
+      </button>
+
+      <nav id="nav-menu" class="nav__menu" aria-label="Primary">
+        <a href="index.html#services">Services</a>
+        <a href="index.html#approach">Approach</a>
+        <a href="demos/">Demos</a>
+        <a href="scorecards.html" aria-current="page">Scorecards</a>
+        <a href="index.html#about">About</a>
+        <a href="team.html">Team</a>
+        <a href="https://bard-portal-877819400319.us-central1.run.app">Client Portal</a>
+        <a class="btn btn--small" href="index.html#contact">Get in touch</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- ============ Scorecards ============ -->
+    <section class="section" id="scorecards">
+      <div class="container">
+        <header class="section__head">
+          <p class="eyebrow">Proof</p>
+          <h2>Scorecards</h2>
+          <p class="section__sub sc-lead">
+            Every claim we make about Lithium, measured. In each test the
+            <b>same 4-billion-parameter model runs on both sides</b> — small enough to
+            live on a phone. The only difference is <span class="vulcan-mark">Vulcan</span>,
+            our validation layer. The intelligence is the model; the honesty is Vulcan.
+          </p>
+        </header>
+
+        <!-- Scorecard 1: hallucination -->
+        <article class="scorecard">
+          <p class="eyebrow">Hallucination · the Bible test</p>
+          <h3>Quote it, or admit you can't</h3>
+          <p class="sc-sub">
+            20 questions on the most-scanned book in human history — 12 references that
+            <em>cannot exist</em>, 4 real verses, 4 calculations. A fabricated verse is
+            the worst error this class of product can make.
+          </p>
+          <div class="sc-versus">
+            <div class="sc-side sc-side--a">
+              <span class="sc-n">60%</span>
+              <span class="sc-l">Ordinary AI<br />5 invented verses · 2 misquotes · 1 wrong sum</span>
+            </div>
+            <div class="sc-vs">vs</div>
+            <div class="sc-side sc-side--b">
+              <span class="sc-n">100%</span>
+              <span class="sc-l"><b>Lithium</b> · <b>Validated by Vulcan&trade;</b><br />every verse read from the corpus, never memory</span>
+            </div>
+          </div>
+          <div class="sc-stats">
+            <span class="sc-chip"><b>76% faster</b> — 0.5s vs 2.2s / answer</span>
+            <span class="sc-chip">Determinism over 6 runs: Lithium <b>95%</b> vs ordinary <b>60%</b></span>
+            <span class="sc-chip">qwen3-4B (Q4_K_M, 2.5&nbsp;GB) · offline</span>
+          </div>
+          <p class="sc-note">
+            Faster <em>because</em> it's honest: Lithium looks a verse up and hands it back
+            instead of composing a 600-character fabrication. Repeated six times, it slipped
+            <b>once</b> — and its own test caught it (we report it, we don't hide it). That
+            transparency is the point.
+          </p>
+          <p class="sc-foot">Same weights on both sides. Single-run accuracy shown; determinism measured across 6 runs, 22–23 July 2026. A real test, not a peer-reviewed study.</p>
+        </article>
+
+        <!-- Scorecard 2: reasoning -->
+        <article class="scorecard">
+          <p class="eyebrow">Reasoning · LogicBench</p>
+          <h3>Honest, not lobotomized</h3>
+          <p class="sc-sub">
+            The fair control: does wrapping a model in a validation layer make it
+            <em>dumber</em> at general reasoning? We ran propositional, first-order, and
+            non-monotonic logic through both sides.
+          </p>
+          <div class="sc-versus">
+            <div class="sc-side sc-side--a">
+              <span class="sc-n">74%</span>
+              <span class="sc-l">Ordinary AI<br />the model on its own</span>
+            </div>
+            <div class="sc-vs">≈</div>
+            <div class="sc-side sc-side--b">
+              <span class="sc-n">72%</span>
+              <span class="sc-l"><b>Lithium</b><br />the same model, checked by Vulcan</span>
+            </div>
+          </div>
+          <div class="sc-stats">
+            <span class="sc-chip">A tie — within noise (n=76)</span>
+            <span class="sc-chip"><b>Zero</b> abstentions — Vulcan doesn't dodge answerable questions</span>
+            <span class="sc-chip">First-order logic: <b>85%</b> both sides</span>
+          </div>
+          <p class="sc-note">
+            The honest result, and the one that matters: grounding doesn't touch pure
+            reasoning, so the scores tie. <b>Vulcan makes the model truthful about facts
+            without making it worse at everything else.</b> You don't trade capability for
+            honesty — you add honesty for free.
+          </p>
+          <p class="sc-foot">LogicBench (MIT). 76 questions, one context per rule, both arms; single run. Neither side "aces" formal logic — a 4B tops out in the low-70s.</p>
+        </article>
+
+        <p class="sc-lead" style="margin-top:1.5rem;">
+          The pattern across every scorecard is the same: you don't need a 70-billion-parameter
+          cloud giant to be trustworthy — you need a small model with a strict supervisor.
+          <span class="vulcan-mark">Validated by Vulcan&trade;.</span>
+        </p>
+      </div>
+    </section>
+
+    <!-- ============ Contact ============ -->
+    <section class="section section--cta" id="contact">
+      <div class="container cta">
+        <h2>Let's build something.</h2>
+        <p>
+          Tell us what you're working on and we'll get back to you within one
+          business day.
+        </p>
+        <div class="cta__actions">
+          <a class="btn btn--lg" data-contact="email" href="#">Email us</a>
+        </div>
+        <p class="cta__fineprint" data-contact="address"></p>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ Footer ============ -->
+  <footer class="site-footer">
+    <div class="container footer">
+      <span class="footer__brand">
+        Bard Technical Solutions LLC
+        <small style="display:block;font-weight:500;color:var(--text-faint);">Innovative IT · Engineering · Cybersecurity · Cambridge, MA</small>
+      </span>
+      <span class="footer__meta">
+        © <span data-year></span> Bard Technical Solutions LLC. All rights reserved.
+      </span>
+      <span class="footer__version" data-version></span>
+    </div>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+</html>

@@ -2,6 +2,19 @@
 
 Newest on top. Latest entry supersedes older ones where they conflict.
 
+## 2026-07-23 — Scorecards page added — v1.3.19
+
+- New `scorecards.html`: measured results for Lithium/Vulcan. Two scorecards — a
+  **hallucination** test (Ordinary AI 60% vs Lithium 100%, "Validated by Vulcan™", plus
+  76%-faster and 95%-vs-60% determinism) and a **LogicBench reasoning** control
+  (74% ≈ 72%, showing Vulcan makes the model honest without making it dumber; zero
+  abstentions). Same header/footer/nav chrome as the other pages; reuses the site tokens
+  with a small scoped `<style>` block for the comparison cards — no changes to `styles.css`.
+- Added "Scorecards" to the primary nav in `index.html` and `team.html`.
+- Honest methodology footnotes on both cards (n, single-run, "a real test, not peer-reviewed");
+  **no commercial content** per the public-repo rule (no pricing/POC/strategy). Bumped
+  `CONFIG.version` 1.3.18 → 1.3.19.
+
 ## 2026-07-12 — Team page added — v1.3.16
 
 - New `team.html`: text-only bio cards (no headshots) for Kathryn Haynes (Director of Advanced
