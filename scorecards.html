@@ -147,40 +147,6 @@
           <p class="sc-foot">Same weights on both sides. Single-run accuracy shown; determinism measured across 6 runs, 22–23 July 2026. A real test, not a peer-reviewed study.</p>
         </article>
 
-        <!-- Scorecard 2: reasoning -->
-        <article class="scorecard">
-          <p class="eyebrow">Reasoning · LogicBench</p>
-          <h3>Honest, not lobotomized</h3>
-          <p class="sc-sub">
-            The fair control: does wrapping a model in a validation layer make it
-            <em>dumber</em> at general reasoning? We ran propositional, first-order, and
-            non-monotonic logic through both sides.
-          </p>
-          <div class="sc-versus">
-            <div class="sc-side sc-side--a">
-              <span class="sc-n">74%</span>
-              <span class="sc-l">Ordinary AI<br />the model on its own</span>
-            </div>
-            <div class="sc-vs">≈</div>
-            <div class="sc-side sc-side--b">
-              <span class="sc-n">72%</span>
-              <span class="sc-l"><b>Lithium</b><br />the same model, checked by Vulcan</span>
-            </div>
-          </div>
-          <div class="sc-stats">
-            <span class="sc-chip">A tie — within noise (n=76)</span>
-            <span class="sc-chip"><b>Zero</b> abstentions — Vulcan doesn't dodge answerable questions</span>
-            <span class="sc-chip">First-order logic: <b>85%</b> both sides</span>
-          </div>
-          <p class="sc-note">
-            The honest result, and the one that matters: grounding doesn't touch pure
-            reasoning, so the scores tie. <b>Vulcan makes the model truthful about facts
-            without making it worse at everything else.</b> You don't trade capability for
-            honesty — you add honesty for free.
-          </p>
-          <p class="sc-foot">LogicBench (MIT). 76 questions, one context per rule, both arms; single run. Neither side "aces" formal logic — a 4B tops out in the low-70s.</p>
-        </article>
-
         <p class="sc-lead" style="margin-top:1.5rem;">
           The pattern across every scorecard is the same: you don't need a 70-billion-parameter
           cloud giant to be trustworthy — you need a small model with a strict supervisor.
