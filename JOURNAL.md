@@ -2,6 +2,20 @@
 
 Newest on top. Latest entry supersedes older ones where they conflict.
 
+## 2026-07-24 — "Try Lithium" tab: Google-gated live demo — v1.3.20
+
+- New `demo.html`: a live qwen-vs-Lithium A/B demo behind **Sign in with Google** (Firebase Auth,
+  project `bardtek-448dc`), capped at **12 questions/day** per Google account. Owl + navy/gold,
+  same chrome. Added "Try Lithium" to the primary nav on index/team/scorecards.
+- Backend: the Lithium gate on the Mac Studio Ultra (`api/gate.py` `/gate/g/ask` — verifies the
+  Firebase ID token via Google's Identity Toolkit, no admin SDK, enforces the cap and runs both
+  the ordinary model and Lithium), exposed publicly via a **Cloudflare tunnel**; `BACKEND` in
+  demo.html points at it. The Firebase web `apiKey` in the page is public by design (identifies
+  the project, grants nothing).
+- **Caveat (follow-up):** the tunnel is currently an **ephemeral `trycloudflare.com` URL** — if it
+  restarts the URL changes and the demo breaks. Durable version = a **named tunnel** (stable
+  `lithium.bardtek.com`) with the Mac always-on. Bumped `CONFIG.version` 1.3.19 → 1.3.20.
+
 ## 2026-07-23 — Scorecards page added — v1.3.19
 
 - New `scorecards.html`: measured results for Lithium/Vulcan. Two scorecards — a

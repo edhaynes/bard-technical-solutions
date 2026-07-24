@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Try Lithium — Bard Technical Solutions LLC</title>
+  <meta name="description" content="Ask one question, see an ordinary 4B model and Lithium (validated by Vulcan) answer side by side. Sign in with Google; 12 questions." />
+  <meta name="theme-color" content="#0b1220" />
+  <meta property="og:title" content="Try Lithium — Bard Technical Solutions LLC" />
+  <meta property="og:description" content="Ordinary AI vs Lithium, side by side. Same 4B model; the difference is Vulcan." />
+  <meta property="og:type" content="website" />
+
+  <link rel="icon" href="assets/favicon.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+
+  <style>
+    .try-wrap { max-width: 760px; margin: 0 auto; }
+    .gate { text-align: center; padding: 1rem 0 2rem; }
+    .gate img { width: 120px; height: auto; filter: drop-shadow(0 2px 10px rgba(0,0,0,.5)); }
+    .gate h2 { font-family: var(--font-display); margin: .75rem 0 .25rem; }
+    .gate p { color: var(--text-muted); max-width: 46ch; margin: 0 auto 1.25rem; }
+    .gsi { display: inline-flex; align-items: center; gap: .6rem; font-weight: 600; font-size: 1rem;
+      background: #fff; color: #1f2430; border: none; border-radius: 10px; padding: .7rem 1.2rem; cursor: pointer; }
+    .gsi:hover { box-shadow: 0 4px 16px rgba(0,0,0,.35); }
+    .gsi svg { width: 20px; height: 20px; }
+    .whoami { display: flex; align-items: center; gap: .6rem; justify-content: flex-end;
+      font-size: .85rem; color: var(--text-muted); margin-bottom: .5rem; }
+    .whoami button { background: none; border: 1px solid var(--border); color: var(--text-muted);
+      border-radius: 8px; padding: .25rem .6rem; font-size: .8rem; cursor: pointer; }
+    .demo[hidden] { display: none; }
+    .askrow { display: flex; gap: .5rem; margin-bottom: .4rem; }
+    .askrow input { flex: 1; min-width: 0; font-size: 16px; color: var(--text);
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: .8rem .9rem; font-family: var(--font-sans); }
+    .askrow input:focus { outline: none; border-color: var(--gold-400); }
+    .askrow button { font-family: var(--font-display); font-weight: 700; color: var(--navy-900);
+      background: var(--gold-400); border: none; border-radius: 12px; padding: 0 1.2rem; cursor: pointer; }
+    .askrow button:disabled { opacity: .5; }
+    .left { color: var(--text-faint); font-size: .8rem; text-align: center; margin: 0 0 1rem; min-height: 1rem; }
+    .left b { color: var(--gold-300); }
+    .chips { display: flex; flex-wrap: wrap; gap: .4rem; justify-content: center; margin-bottom: 1.25rem; }
+    .chip { font-size: .8rem; color: var(--text-muted); background: var(--surface);
+      border: 1px solid var(--border); border-radius: 999px; padding: .4rem .75rem; cursor: pointer; }
+    .cols { display: grid; grid-template-columns: 1fr; gap: .75rem; }
+    @media (min-width: 640px) { .cols { grid-template-columns: 1fr 1fr; } }
+    .col { border: 1px solid var(--border); border-radius: 14px; background: var(--surface); overflow: hidden; }
+    .col.lith { border-color: rgba(231,200,120,.4); }
+    .col h3 { margin: 0; font-family: var(--font-display); font-size: .8rem; letter-spacing: .3px;
+      padding: .7rem .9rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: .5rem; }
+    .col h3 .sub { font-family: var(--font-sans); font-weight: 400; color: var(--text-faint); font-size: .72rem; margin-left: auto; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; }
+    .col.raw .dot { background: #e0736b; } .col.lith .dot { background: var(--gold-400); }
+    .body { padding: .85rem .9rem; font-size: .92rem; line-height: 1.5; min-height: 3rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .body.muted { color: var(--text-faint); }
+    .badge { display: inline-block; font-family: var(--font-display); font-weight: 700; font-size: .68rem; border-radius: 999px; padding: .15rem .55rem; margin-bottom: .4rem; }
+    .badge.ok { background: rgba(90,170,110,.16); color: #7ecb8f; }
+    .badge.idk { background: rgba(231,200,120,.16); color: var(--gold-300); }
+    .body.err { color: #e0736b; }
+    .disabled-note { text-align:center; color: var(--text-faint); font-size: .8rem; margin-top: 1rem; }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header" id="top">
+    <div class="container nav">
+      <a class="brand" href="index.html" aria-label="Bard Technical Solutions home">
+        <img class="brand__mark" src="assets/owl.png" width="99" height="120" alt="" aria-hidden="true" />
+        <span class="brand__text">Bard<span class="brand__accent"> Technical Solutions</span></span>
+      </a>
+      <button class="nav__toggle" aria-expanded="false" aria-controls="nav-menu" aria-label="Toggle navigation menu">
+        <span></span><span></span><span></span>
+      </button>
+      <nav id="nav-menu" class="nav__menu" aria-label="Primary">
+        <a href="index.html#services">Services</a>
+        <a href="index.html#approach">Approach</a>
+        <a href="demos/">Demos</a>
+        <a href="scorecards.html">Scorecards</a>
+        <a href="demo.html" aria-current="page">Try Lithium</a>
+        <a href="index.html#about">About</a>
+        <a href="team.html">Team</a>
+        <a class="btn btn--small" href="index.html#contact">Get in touch</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="section">
+      <div class="container try-wrap">
+        <header class="section__head">
+          <p class="eyebrow">Live demo</p>
+          <h2>Try Lithium</h2>
+          <p class="section__sub">Ask once. An ordinary 4-billion-parameter model and <b>Lithium</b>
+            — the same model, <b>validated by Vulcan™</b> — answer side by side. Watch which one
+            admits when it doesn't know.</p>
+        </header>
+
+        <!-- Signed-out: Google gate -->
+        <div class="gate" id="gate">
+          <img src="assets/lithium-owl.png" alt="Lithium" />
+          <h2>Sign in to try it</h2>
+          <p>Free — <b>12 questions</b>. We use your Google account only to identify you and cap
+            the trial. No spam.</p>
+          <button class="gsi" id="signin">
+            <svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.6l6.8-6.8C35.6 2.4 30.2 0 24 0 14.6 0 6.5 5.4 2.6 13.3l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.1 5.3-4.5 7l7 5.4c4.1-3.8 6.7-9.4 6.7-16.9z"/><path fill="#FBBC05" d="M10.5 28.4c-.5-1.4-.8-2.9-.8-4.4s.3-3 .8-4.4l-7.9-6.1C1 16.7 0 20.2 0 24s1 7.3 2.6 10.5l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.2 0 11.4-2 15.2-5.5l-7-5.4c-2 1.3-4.5 2.1-8.2 2.1-6.3 0-11.6-4.1-13.5-9.7l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg>
+            Sign in with Google
+          </button>
+          <p class="disabled-note" id="authNote"></p>
+        </div>
+
+        <!-- Signed-in: the demo -->
+        <div class="demo" id="demo" hidden>
+          <div class="whoami"><span id="who"></span><button id="signout">Sign out</button></div>
+          <form id="ask" class="askrow" autocomplete="off">
+            <input id="q" type="text" placeholder="A Bible verse, a sum, anything…" aria-label="Your question" />
+            <button id="go" type="submit">Ask both</button>
+          </form>
+          <div class="left" id="left"></div>
+          <div class="chips" id="chips"></div>
+          <div class="cols">
+            <section class="col raw">
+              <h3><span class="dot"></span> Ordinary AI <span class="sub">the model alone</span></h3>
+              <div class="body muted" id="ansA">Ask a question to compare.</div>
+            </section>
+            <section class="col lith">
+              <h3><span class="dot"></span> Lithium <span class="sub">validated by Vulcan™</span></h3>
+              <div class="body muted" id="ansB">Grounded, or an honest “I don't know”.</div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer">
+      <span class="footer__brand">Bard Technical Solutions LLC
+        <small style="display:block;font-weight:500;color:var(--text-faint);">Innovative IT · Engineering · Cybersecurity · Cambridge, MA</small>
+      </span>
+      <span class="footer__meta">© <span data-year></span> Bard Technical Solutions LLC. All rights reserved.</span>
+      <span class="footer__version" data-version></span>
+    </div>
+  </footer>
+
+  <script src="main.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
+      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    // Public Firebase web config — safe to ship (identifies the project, does not grant access).
+    const firebaseConfig = {
+      apiKey: "AIzaSyAMfoFTyTa-czyNkWxNDfcTlxAKFsUt0so",
+      authDomain: "bardtek-448dc.firebaseapp.com",
+      projectId: "bardtek-448dc",
+      storageBucket: "bardtek-448dc.firebasestorage.app",
+      messagingSenderId: "1008367771814",
+      appId: "1:1008367771814:web:977fdee7e4602eca781467",
+    };
+    // The token-verified gate backend (Cloud Run). Set once deployed.
+    const BACKEND = "https://pine-plates-vat-broken.trycloudflare.com";
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const $ = (id) => document.getElementById(id);
+    const IDK = /don'?t know|do not know|not confident|lookup failed|can'?t find|couldn'?t find/i;
+
+    const TRAPS = ["Quote Hezekiah 3:16 for me.", "Quote 2 Timothy 5:1 for me.",
+                   "What is 847263 times 92847?", "Quote John 3:16 for me."];
+    for (const q of TRAPS) {
+      const b = document.createElement("button");
+      b.className = "chip"; b.type = "button"; b.textContent = q;
+      b.addEventListener("click", () => { $("q").value = q; run(q); });
+      $("chips").appendChild(b);
+    }
+
+    $("signin").addEventListener("click", async () => {
+      $("authNote").textContent = "";
+      try { await signInWithPopup(auth, new GoogleAuthProvider()); }
+      catch (e) { $("authNote").textContent = e.code === "auth/operation-not-allowed"
+        ? "Google sign-in isn't enabled yet on this project."
+        : "Sign-in failed: " + (e.message || e.code); }
+    });
+    $("signout").addEventListener("click", () => signOut(auth));
+
+    onAuthStateChanged(auth, (user) => {
+      const on = !!user;
+      $("gate").hidden = on; $("demo").hidden = !on;
+      if (on) $("who").textContent = user.email || user.displayName || "Signed in";
+    });
+
+    function show(el, state, res) {
+      el.className = "body";
+      if (state === "loading") { el.classList.add("muted"); el.textContent = "thinking…"; return; }
+      if (state === "error") { el.classList.add("err"); el.textContent = res || "Couldn't reach the backend."; return; }
+      let badge = "";
+      if (res.idk) badge = `<span class="badge idk">✓ said “I don't know”</span>`;
+      else if (res.grounded) badge = `<span class="badge ok">✓ verified</span>`;
+      el.innerHTML = badge; el.appendChild(document.createTextNode(res.text || ""));
+    }
+    function setLeft(n, limit) { $("left").innerHTML = (n == null) ? "" : `<b>${n}</b> of ${limit || 12} questions left`; }
+
+    let busy = false;
+    async function run(question) {
+      question = (question || $("q").value).trim();
+      if (!question || busy) return;
+      const user = auth.currentUser; if (!user) return;
+      busy = true; $("go").disabled = true;
+      show($("ansA"), "loading"); show($("ansB"), "loading");
+      try {
+        const token = await user.getIdToken();
+        const r = await fetch(`${BACKEND}/gate/g/ask`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+          body: JSON.stringify({ question }),
+        });
+        const d = await r.json().catch(() => ({}));
+        if (r.status === 429) { show($("ansA"), "error", d.detail); show($("ansB"), "error", d.detail); setLeft(0); return; }
+        if (!r.ok) throw new Error(d.detail || `backend ${r.status}`);
+        const L = d.lithium || {};
+        show($("ansA"), "done", { text: (d.raw && d.raw.text) || "(no answer)", grounded: false, idk: false });
+        show($("ansB"), "done", { text: L.text || "", grounded: !!(L.provenance && L.provenance.grounded),
+          idk: L.kind === "abstain" || IDK.test(L.text || "") });
+        setLeft(d.remaining_today, d.daily_limit);
+      } catch (e) {
+        show($("ansA"), "error", "Preview backend isn't live yet."); show($("ansB"), "error", "Preview backend isn't live yet.");
+      } finally { busy = false; $("go").disabled = false; }
+    }
+    $("ask").addEventListener("submit", (e) => { e.preventDefault(); run(); });
+  </script>
+</body>
+</html>
