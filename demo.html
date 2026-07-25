@@ -159,8 +159,10 @@
       messagingSenderId: "1008367771814",
       appId: "1:1008367771814:web:977fdee7e4602eca781467",
     };
-    // The token-verified gate backend (Cloud Run). Set once deployed.
-    const BACKEND = "https://pine-plates-vat-broken.trycloudflare.com";
+    // The token-verified gate backend. Static Tailscale Funnel URL straight to the
+    // Mac's :8090 — permanent (doesn't rotate like the old trycloudflare quick tunnel),
+    // TLS included. Invisible to users; only this frontend calls it.
+    const BACKEND = "https://ehayness-mac-studio.taild08fd9.ts.net";
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
