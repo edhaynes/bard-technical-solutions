@@ -66,9 +66,17 @@
     .truth[hidden] { display:none; }
     .truth b { color: var(--gold-300); }
     /* Per-answer latency line under each column. */
-    .meta { margin-top:.55rem; font-size:.74rem; color: var(--text-faint); display:flex; gap:.6rem; align-items:center; }
+    .meta { margin-top:.55rem; font-size:.74rem; color: var(--text-faint); display:flex; flex-wrap:wrap; gap:.6rem; align-items:center; }
     .meta .t { font-variant-numeric: tabular-nums; }
     .meta .first { color: var(--gold-300); font-weight:700; }
+    .meta .slower { color:#e0736b; font-weight:600; font-variant-numeric: tabular-nums; }
+    /* Lithium's column pops when it answers (it answers first). */
+    @keyframes pop {
+      0%   { transform: scale(.985); box-shadow: 0 0 0 rgba(231,200,120,0); }
+      45%  { transform: scale(1.012); box-shadow: 0 0 26px rgba(231,200,120,.42); }
+      100% { transform: scale(1); box-shadow: 0 0 0 rgba(231,200,120,0); }
+    }
+    .col.lith.pop { animation: pop .6s ease-out; }
   </style>
 </head>
 <body>
@@ -223,6 +231,7 @@
     function show(el, state, res) {
       el.className = "body";
       if (state === "loading") { el.classList.add("muted"); el.textContent = "thinking…"; return; }
+      if (state === "waiting") { el.classList.add("muted"); el.textContent = "still thinking… " + (res / 1000).toFixed(1) + " s"; return; }
       if (state === "error") { el.classList.add("err"); el.textContent = res || "Couldn't reach the backend."; return; }
       let badge = "";
       if (res.idk) badge = `<span class="badge idk">✓ said “I don't know”</span>`;
@@ -240,12 +249,19 @@
           f.className = "first"; f.textContent = "⚡ answered first";
           meta.appendChild(f);
         }
+        if (res.slowerBy != null && res.slowerBy > 300) {
+          const s = document.createElement("span");
+          s.className = "slower"; s.textContent = "🐢 " + (res.slowerBy / 1000).toFixed(1) + " s slower than Lithium";
+          meta.appendChild(s);
+        }
         el.appendChild(meta);
       }
     }
     function setLeft(n, limit) { $("left").innerHTML = (n == null) ? "" : `<b>${n}</b> of ${limit || 12} questions left`; }
 
     let busy = false;
+    const pop = (el) => { if (!el) return; el.classList.remove("pop"); void el.offsetWidth; el.classList.add("pop"); };
+
     async function run(question) {
       question = (question || $("q").value).trim();
       if (!question || busy) return;
@@ -255,26 +271,48 @@
       else { truthEl.hidden = true; truthEl.innerHTML = ""; }
       busy = true; $("go").disabled = true;
       show($("ansA"), "loading"); show($("ansB"), "loading");
+
+      let headers;
       try {
         const token = await user.getIdToken();
-        const r = await fetch(`${BACKEND}/gate/g/ask`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
-          body: JSON.stringify({ question }),
-        });
+        headers = { "Content-Type": "application/json", "Authorization": "Bearer " + token };
+      } catch (e) {
+        const m = "Sign-in expired — please sign in again.";
+        show($("ansA"), "error", m); show($("ansB"), "error", m);
+        busy = false; $("go").disabled = false; return;
+      }
+
+      // 1) Lithium first — fast, and its window pops. A failure here is a real backend problem.
+      let lithMs = null;
+      try {
+        const r = await fetch(`${BACKEND}/gate/g/ask/lithium`, { method: "POST", headers, body: JSON.stringify({ question }) });
         const d = await r.json().catch(() => ({}));
-        if (r.status === 429) { show($("ansA"), "error", d.detail); show($("ansB"), "error", d.detail); setLeft(0); return; }
+        if (r.status === 429) { show($("ansA"), "error", d.detail); show($("ansB"), "error", d.detail); setLeft(0); busy = false; $("go").disabled = false; return; }
         if (!r.ok) throw new Error(d.detail || `backend ${r.status}`);
         const L = d.lithium || {};
-        const rawMs = d.raw ? d.raw.ms : null, lithMs = L.ms;
-        const bothTimed = rawMs != null && lithMs != null;
-        show($("ansA"), "done", { text: (d.raw && d.raw.text) || "(no answer)", grounded: false, idk: false,
-          ms: rawMs, first: bothTimed && rawMs < lithMs });
+        lithMs = L.ms;
         show($("ansB"), "done", { text: L.text || "", grounded: !!(L.provenance && L.provenance.grounded),
-          idk: L.kind === "abstain" || IDK.test(L.text || ""), ms: lithMs, first: bothTimed && lithMs <= rawMs });
+          idk: L.kind === "abstain" || IDK.test(L.text || ""), ms: L.ms, first: true });
+        pop(document.querySelector(".col.lith"));
         setLeft(d.remaining_today, d.daily_limit);
       } catch (e) {
         show($("ansA"), "error", "Preview backend isn't live yet."); show($("ansB"), "error", "Preview backend isn't live yet.");
+        busy = false; $("go").disabled = false; return;
+      }
+
+      // 2) qwen — let it finish; tick a live counter so the extra time is visible.
+      const started = performance.now();
+      const tick = setInterval(() => show($("ansA"), "waiting", performance.now() - started), 200);
+      try {
+        const r = await fetch(`${BACKEND}/gate/g/ask/raw`, { method: "POST", headers, body: JSON.stringify({ question }) });
+        const d = await r.json().catch(() => ({}));
+        clearInterval(tick);
+        const R = d.raw || {};
+        show($("ansA"), "done", { text: R.text || R.error || "(no answer)", grounded: false, idk: false,
+          ms: R.ms, first: false, slowerBy: (R.ms != null && lithMs != null) ? R.ms - lithMs : null });
+      } catch (e) {
+        clearInterval(tick);
+        show($("ansA"), "error", "qwen didn't come back (took too long).");
       } finally { busy = false; $("go").disabled = false; }
     }
     $("ask").addEventListener("submit", (e) => { e.preventDefault(); run(); });
