@@ -273,6 +273,18 @@
     }
     function setLeft(n, limit) { $("left").innerHTML = (n == null) ? "" : `<b>${n}</b> of ${limit || 12} questions left`; }
 
+    // Live-updating render for the streaming qwen arm: growing text + a running timer.
+    function showStream(el, text, elapsedMs) {
+      el.className = "body";
+      el.textContent = text || "";
+      const meta = document.createElement("div");
+      meta.className = "meta";
+      const t = document.createElement("span");
+      t.className = "t"; t.textContent = "⏱ " + (elapsedMs / 1000).toFixed(1) + " s · writing…";
+      meta.appendChild(t);
+      el.appendChild(meta);
+    }
+
     let busy = false;
     const pop = (el) => { if (!el) return; el.classList.remove("pop"); void el.offsetWidth; el.classList.add("pop"); };
 
@@ -314,16 +326,26 @@
         busy = false; $("go").disabled = false; return;
       }
 
-      // 2) qwen — let it finish; tick a live counter so the extra time is visible.
+      // 2) qwen — STREAM tokens live so you can watch it work; let it finish.
       const started = performance.now();
-      const tick = setInterval(() => show($("ansA"), "waiting", performance.now() - started), 200);
+      let text = "";
+      const repaint = () => showStream($("ansA"), text, performance.now() - started);
+      const tick = setInterval(repaint, 120);   // keep the timer ticking between tokens
       try {
-        const r = await fetch(`${BACKEND}/gate/g/ask/raw`, { method: "POST", headers, body: JSON.stringify({ question }) });
-        const d = await r.json().catch(() => ({}));
+        const r = await fetch(`${BACKEND}/gate/g/ask/raw/stream`, { method: "POST", headers, body: JSON.stringify({ question }) });
+        if (!r.ok || !r.body) throw new Error("stream unavailable");
+        const reader = r.body.getReader();
+        const dec = new TextDecoder();
+        for (;;) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          text += dec.decode(value, { stream: true });
+          repaint();
+        }
         clearInterval(tick);
-        const R = d.raw || {};
-        show($("ansA"), "done", { text: R.text || R.error || "(no answer)", grounded: false, idk: false,
-          ms: R.ms, first: false, slowerBy: (R.ms != null && lithMs != null) ? R.ms - lithMs : null });
+        const ms = Math.round(performance.now() - started);
+        show($("ansA"), "done", { text: text || "(no answer)", grounded: false, idk: false,
+          ms, first: false, slowerBy: (lithMs != null) ? ms - lithMs : null });
       } catch (e) {
         clearInterval(tick);
         show($("ansA"), "error", "qwen didn't come back (took too long).");
