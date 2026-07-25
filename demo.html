@@ -246,7 +246,7 @@
       if (state === "waiting") { el.classList.add("muted"); el.textContent = "still thinking… " + (res / 1000).toFixed(1) + " s"; return; }
       if (state === "error") { el.classList.add("err"); el.textContent = res || "Couldn't reach the backend."; return; }
       let badge = "";
-      if (res.idk) badge = `<span class="badge idk">✓ said “I don't know”</span>`;
+      if (res.idk) badge = `<span class="badge idk">✓ didn't make it up</span>`;
       else if (res.grounded) badge = `<span class="badge ok">✓ verified</span>`;
       el.innerHTML = badge;
       el.appendChild(document.createTextNode(res.text || ""));
