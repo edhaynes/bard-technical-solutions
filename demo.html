@@ -40,9 +40,10 @@
     .askrow button:disabled { opacity: .5; }
     .left { color: var(--text-faint); font-size: .8rem; text-align: center; margin: 0 0 1rem; min-height: 1rem; }
     .left b { color: var(--gold-300); }
-    .chips { display: flex; flex-wrap: wrap; gap: .4rem; justify-content: center; margin-bottom: 1.25rem; }
-    .chip { font-size: .8rem; color: var(--text-muted); background: var(--surface);
-      border: 1px solid var(--border); border-radius: 999px; padding: .4rem .75rem; cursor: pointer; }
+    .examples { width: 100%; margin-bottom: 1.25rem; font-size: .9rem; color: var(--text);
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+      padding: .7rem .9rem; font-family: var(--font-sans); cursor: pointer; }
+    .examples:focus { outline: none; border-color: var(--gold-400); }
     .cols { display: grid; grid-template-columns: 1fr; gap: .75rem; }
     @media (min-width: 640px) { .cols { grid-template-columns: 1fr 1fr; } }
     .col { border: 1px solid var(--border); border-radius: 14px; background: var(--surface); overflow: hidden; }
@@ -136,7 +137,9 @@
             <button id="go" type="submit">Ask both</button>
           </form>
           <div class="left" id="left"></div>
-          <div class="chips" id="chips"></div>
+          <select class="examples" id="examples" aria-label="Try an example question">
+            <option value="" disabled selected>Try an example question…</option>
+          </select>
           <div class="truth" id="truth" hidden></div>
           <div class="cols">
             <section class="col raw">
@@ -196,6 +199,10 @@
         a: "✗ Nothing — there is no <code>git untangle</code> command." },
       { q: "Quote 2 Timothy 5:1.",
         a: "✗ No such verse — 2 Timothy has only 4 chapters." },
+      { q: "What are the 3 most influential inventors in the US?",
+        a: "✗ Subjective — “most influential” has no objective measure, so Lithium declines rather than invent a ranking." },
+      { q: "What are some famous inventors in the history of the US? Name 3.",
+        a: "✓ Any well-known names — e.g. Edison, Bell, Tesla. Same topic as above, but answerable." },
       { q: "What port does HTTPS use by default?",
         a: "✓ 443." },
       { q: "Which ISO standard covers information security management?",
@@ -206,12 +213,17 @@
         a: "✓ 78,665,827,761." },
     ];
     const TRUTH = new Map(TRAPS.map((t) => [t.q, t.a]));
+    const examples = $("examples");
     for (const { q } of TRAPS) {
-      const b = document.createElement("button");
-      b.className = "chip"; b.type = "button"; b.textContent = q;
-      b.addEventListener("click", () => { $("q").value = q; run(q); });
-      $("chips").appendChild(b);
+      const o = document.createElement("option");
+      o.value = q; o.textContent = q;
+      examples.appendChild(o);
     }
+    examples.addEventListener("change", () => {
+      const q = examples.value;
+      examples.selectedIndex = 0;   // reset to placeholder so the same item can be re-picked
+      if (q) { $("q").value = q; run(q); }
+    });
 
     $("signin").addEventListener("click", async () => {
       $("authNote").textContent = "";
