@@ -59,6 +59,16 @@
     .badge.idk { background: rgba(231,200,120,.16); color: var(--gold-300); }
     .body.err { color: #e0736b; }
     .disabled-note { text-align:center; color: var(--text-faint); font-size: .8rem; margin-top: 1rem; }
+    /* Correct-answer legend: ground truth for a known prompt, so you can grade both columns. */
+    .truth { text-align:center; font-size:.82rem; color: var(--text-muted); margin: 0 0 1rem;
+      background: rgba(231,200,120,.08); border:1px solid rgba(231,200,120,.28);
+      border-radius: 10px; padding:.5rem .75rem; }
+    .truth[hidden] { display:none; }
+    .truth b { color: var(--gold-300); }
+    /* Per-answer latency line under each column. */
+    .meta { margin-top:.55rem; font-size:.74rem; color: var(--text-faint); display:flex; gap:.6rem; align-items:center; }
+    .meta .t { font-variant-numeric: tabular-nums; }
+    .meta .first { color: var(--gold-300); font-weight:700; }
   </style>
 </head>
 <body>
@@ -114,14 +124,15 @@
         <div class="demo" id="demo" hidden>
           <div class="whoami"><span id="who"></span><button id="signout">Sign out</button></div>
           <form id="ask" class="askrow" autocomplete="off">
-            <input id="q" type="text" placeholder="A Bible verse, a sum, anything…" aria-label="Your question" />
+            <input id="q" type="text" placeholder="A git command, a port number, a citation…" aria-label="Your question" />
             <button id="go" type="submit">Ask both</button>
           </form>
           <div class="left" id="left"></div>
           <div class="chips" id="chips"></div>
+          <div class="truth" id="truth" hidden></div>
           <div class="cols">
             <section class="col raw">
-              <h3><span class="dot"></span> Ordinary AI <span class="sub">the model alone</span></h3>
+              <h3><span class="dot"></span> Ordinary AI <span class="sub">qwen 4B — the model alone</span></h3>
               <div class="body muted" id="ansA">Ask a question to compare.</div>
             </section>
             <section class="col lith">
@@ -169,9 +180,25 @@
     const $ = (id) => document.getElementById(id);
     const IDK = /don'?t know|do not know|not confident|lookup failed|can'?t find|couldn'?t find/i;
 
-    const TRAPS = ["Quote Hezekiah 3:16 for me.", "Quote 2 Timothy 5:1 for me.",
-                   "What is 847263 times 92847?", "Quote John 3:16 for me."];
-    for (const q of TRAPS) {
+    // Canned prompts, each paired with the CORRECT answer so you can grade both columns.
+    // A mix of "doesn't exist → an honest model should abstain" (✗) and short verifiable
+    // facts (✓), skewed to business/technical topics. The first is the flagship.
+    const TRAPS = [
+      { q: "What does the `git untangle` command do?",
+        a: "✗ Nothing — there is no <code>git untangle</code> command." },
+      { q: "Quote 2 Timothy 5:1.",
+        a: "✗ No such verse — 2 Timothy has only 4 chapters." },
+      { q: "What port does HTTPS use by default?",
+        a: "✓ 443." },
+      { q: "Which ISO standard covers information security management?",
+        a: "✓ ISO/IEC 27001." },
+      { q: "Cite the U.S. federal statute that bans all non-compete agreements.",
+        a: "✗ None exists — no federal statute bans them nationwide." },
+      { q: "What is 847263 × 92847?",
+        a: "✓ 78,665,827,761." },
+    ];
+    const TRUTH = new Map(TRAPS.map((t) => [t.q, t.a]));
+    for (const { q } of TRAPS) {
       const b = document.createElement("button");
       b.className = "chip"; b.type = "button"; b.textContent = q;
       b.addEventListener("click", () => { $("q").value = q; run(q); });
@@ -200,7 +227,21 @@
       let badge = "";
       if (res.idk) badge = `<span class="badge idk">✓ said “I don't know”</span>`;
       else if (res.grounded) badge = `<span class="badge ok">✓ verified</span>`;
-      el.innerHTML = badge; el.appendChild(document.createTextNode(res.text || ""));
+      el.innerHTML = badge;
+      el.appendChild(document.createTextNode(res.text || ""));
+      if (res.ms != null) {
+        const meta = document.createElement("div");
+        meta.className = "meta";
+        const t = document.createElement("span");
+        t.className = "t"; t.textContent = "⏱ " + (res.ms / 1000).toFixed(2) + " s";
+        meta.appendChild(t);
+        if (res.first) {
+          const f = document.createElement("span");
+          f.className = "first"; f.textContent = "⚡ answered first";
+          meta.appendChild(f);
+        }
+        el.appendChild(meta);
+      }
     }
     function setLeft(n, limit) { $("left").innerHTML = (n == null) ? "" : `<b>${n}</b> of ${limit || 12} questions left`; }
 
@@ -209,6 +250,9 @@
       question = (question || $("q").value).trim();
       if (!question || busy) return;
       const user = auth.currentUser; if (!user) return;
+      const truthEl = $("truth"), known = TRUTH.get(question);
+      if (known) { truthEl.hidden = false; truthEl.innerHTML = "<b>Correct answer:</b> " + known; }
+      else { truthEl.hidden = true; truthEl.innerHTML = ""; }
       busy = true; $("go").disabled = true;
       show($("ansA"), "loading"); show($("ansB"), "loading");
       try {
@@ -222,9 +266,12 @@
         if (r.status === 429) { show($("ansA"), "error", d.detail); show($("ansB"), "error", d.detail); setLeft(0); return; }
         if (!r.ok) throw new Error(d.detail || `backend ${r.status}`);
         const L = d.lithium || {};
-        show($("ansA"), "done", { text: (d.raw && d.raw.text) || "(no answer)", grounded: false, idk: false });
+        const rawMs = d.raw ? d.raw.ms : null, lithMs = L.ms;
+        const bothTimed = rawMs != null && lithMs != null;
+        show($("ansA"), "done", { text: (d.raw && d.raw.text) || "(no answer)", grounded: false, idk: false,
+          ms: rawMs, first: bothTimed && rawMs < lithMs });
         show($("ansB"), "done", { text: L.text || "", grounded: !!(L.provenance && L.provenance.grounded),
-          idk: L.kind === "abstain" || IDK.test(L.text || "") });
+          idk: L.kind === "abstain" || IDK.test(L.text || ""), ms: lithMs, first: bothTimed && lithMs <= rawMs });
         setLeft(d.remaining_today, d.daily_limit);
       } catch (e) {
         show($("ansA"), "error", "Preview backend isn't live yet."); show($("ansB"), "error", "Preview backend isn't live yet.");

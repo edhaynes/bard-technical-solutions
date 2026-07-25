@@ -2,6 +2,22 @@
 
 Newest on top. Latest entry supersedes older ones where they conflict.
 
+## 2026-07-25 — Try Lithium: static backend + resilient service + demo polish — v1.3.21/22
+
+- **Durable backend (root-cause fix).** The demo hardcoded an *ephemeral* `trycloudflare` URL, so
+  every Mac/tunnel restart orphaned the frontend ("Preview backend isn't live yet"). Replaced with
+  a **static Tailscale Funnel** URL (`ehayness-mac-studio.taild08fd9.ts.net` → Mac `:8090`) — never
+  rotates, TLS, free, no DNS migration. `BACKEND` in demo.html repointed (v1.3.21).
+- **Resilient service.** The `:8090` gate now runs under **launchd** (`com.bardtek.lithium-gate`,
+  `KeepAlive`+`RunAtLoad`, secrets from a gitignored `.env` via `scripts/run-gate.sh`) — survives
+  crash (respawn ~3s) and reboot. ollama is already a managed service. Remaining gap: Mac idle-sleep
+  (`pmset -a sleep 0`, needs sudo). This is one physical Mac — no true HA without paid cloud.
+- **Demo polish (v1.3.22).** Per-answer **latency** ("⏱ 0.42 s" + "⚡ answered first"); a
+  **correct-answer legend** for the canned prompts; new **business/technical** example prompts
+  (git-command fabrication, HTTPS port, ISO 27001, non-compete statute, a big product) — kept one
+  Bible verse. Ordinary-AI column now labelled **qwen 4B**. Backend `/gate/g/ask` returns per-arm
+  `ms` (lithium repo `a597d77`).
+
 ## 2026-07-24 — "Try Lithium" tab: Google-gated live demo — v1.3.20
 
 - New `demo.html`: a live qwen-vs-Lithium A/B demo behind **Sign in with Google** (Firebase Auth,
