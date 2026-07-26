@@ -96,7 +96,6 @@
         <a href="index.html#services">Services</a>
         <a href="index.html#approach">Approach</a>
         <a href="demos/">Demos</a>
-        <a href="scorecards.html">Scorecards</a>
         <a href="demo.html" aria-current="page">Try Lithium</a>
         <a href="demos/why-trust-lithium/">Why Lithium</a>
         <a href="index.html#about">About</a>
@@ -237,10 +236,18 @@
     });
     $("signout").addEventListener("click", () => signOut(auth));
 
+    // ?q=<question> lets another page link straight at a worked example. Fill the box
+    // immediately so the question survives the sign-in round trip, then ask once — only
+    // after auth resolves, since run() bails without a user.
+    const linkedQ = (new URLSearchParams(location.search).get("q") || "").trim().slice(0, 500);
+    if (linkedQ) $("q").value = linkedQ;
+    let askedLinked = false;
+
     onAuthStateChanged(auth, (user) => {
       const on = !!user;
       $("gate").hidden = on; $("demo").hidden = !on;
       if (on) $("who").textContent = user.email || user.displayName || "Signed in";
+      if (on && linkedQ && !askedLinked) { askedLinked = true; run(linkedQ); }
     });
 
     function show(el, state, res) {

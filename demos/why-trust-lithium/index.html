@@ -19,6 +19,8 @@
   .mark{color:var(--gold);font-weight:700}
   .arch{font-size:.9rem;color:var(--faint);border:1px solid var(--border);border-radius:10px;
     padding:.7rem 1rem;margin:1.4rem 0 2.4rem;background:var(--surface)}
+  .arch .how{margin:.6rem 0 0;padding-top:.6rem;border-top:1px solid var(--border);color:var(--muted)}
+  .arch .how b{color:var(--gold2)}
   .pillar{border:1px solid var(--border);border-radius:16px;background:var(--surface);
     padding:1.5rem 1.5rem;margin-bottom:1.4rem}
   /* The guarantee IS the claim — it leads. "Guarantee N" stays a small tag so the
@@ -87,11 +89,14 @@
 <div class="wrap">
 
   <h1>Why trust Lithium?</h1>
-  <p class="lede">Same 4-billion-parameter model everyone runs — the difference is <span class="mark">discipline</span>:
-  a validation layer that sits <em>outside</em> the model, where it can be proven.</p>
+  <p class="lede">Same 4B model everyone runs. The difference is <span class="mark">discipline</span>:
+  validation that sits <em>outside</em> the model, where it can be proven.</p>
 
-  <div class="arch">The mind is a commodity; the conscience is the product. Because Vulcan lives outside the weights,
-  it stays small (runs on a phone), model-agnostic, and — critically — <b>provable</b>. With discipline you can prove anything.</div>
+  <div class="arch">With discipline you can prove anything.
+    <p class="how">Qwen 4B drafts the answer. Lithium checks every claim against the actual source — and
+    <b>abstains when it can't prove one</b>. Domain knowledge attaches as a plugin the engine enforces:
+    medical coding, CAN bus, industrial automation, your own rulebook.</p>
+  </div>
 
   <!-- 1 -->
   <section class="pillar">
@@ -105,15 +110,14 @@
       <div class="tarrow">→</div>
       <div class="tcell li"><span class="tnum">99.9%</span><span class="twho">Lithium</span><span class="tcap">proves vs the 46,881-code list</span></div>
     </div>
-    <p style="text-align:center;font-size:.85rem;color:var(--muted);margin:-.2rem 0 .6rem">Lithium
-    <b style="color:var(--gold2)">clears the human bar</b> over 1,500 real FY2026 claims — deterministically,
-    in microseconds, with the rule cited every time.</p>
-    <p class="hook">Lithium proves every code against the real 2,069-page FY2026 Tabular List — the exact rule cited,
-    ~103,000 decisions/sec. A model just reasons from memory, and won't cite the rule an auditor needs.</p>
+    <p style="text-align:center;font-size:.85rem;color:var(--muted);margin:-.2rem 0 .6rem"><b style="color:var(--gold2)">Clears the human bar</b> over 1,500 real FY2026 claims.
+    Deterministic, microseconds, rule cited every time.</p>
+    <p class="hook">Every code is proven against the real 2,069-page FY2026 ICD-10 rulebook. Rule cited, ~103,000
+    decisions/sec. A model reasons from memory. It can't cite the rule an auditor asks for.</p>
     <details class="d"><summary>Real capture — “Is E11 (type 2 diabetes) billable by itself?”</summary>
       <div class="vs">
         <div class="side q"><div class="h">qwen 4B — alone</div><div class="a">“No… However, E11 itself is a valid and billable code… So, yes —” <em>(contradicts itself in one breath)</em></div></div>
-        <div class="side l"><div class="h">Lithium — proven</div><div class="a">Rejected — E11 is a category header; the Tabular List requires a specific code (E11.9). Same verdict every run, rule cited.</div></div>
+        <div class="side l"><div class="h">Lithium — proven</div><div class="a">Rejected — E11 is a category header; the ICD-10 rulebook requires a specific code (E11.9). Same verdict every run, rule cited.</div></div>
       </div>
     </details>
     <a class="demo" href="../icd10cm/index.html">▶ Run the live ICD-10 claim monitor →</a>
@@ -174,8 +178,8 @@
       <div class="tarrow">→</div>
       <div class="tcell li"><span class="tnum">100%</span><span class="twho">Lithium</span><span class="tcap">exhaustive proof</span></div>
     </div>
-    <p class="hook">An LLM <em>tells</em> you an argument is valid. Lithium <em>proves</em> it — the conclusion holds in
-    every row where the premises do. No counterexample exists, and it checked them all.</p>
+    <p class="hook">An LLM <em>tells</em> you an argument is valid. Lithium <em>proves</em> it. The conclusion
+    holds in every row where the premises do, and it checked every row.</p>
     <details class="d"><summary>The proof — <code>(P→Q) ∧ (R→S) ∧ (P∨R) ⊢ (Q∨S)</code></summary>
       <table class="tt">
         <tr><th>P</th><th>Q</th><th>R</th><th>S</th><th>premises</th><th>Q∨S</th><th></th></tr>
@@ -187,6 +191,7 @@
       </table>
       <div style="color:var(--green);font-weight:700;font-size:.85rem">VALID — all 16 assignments checked, no counterexample.</div>
     </details>
+      <a class="demo" href="../../demo.html?q=If%20P%20then%20Q.%20If%20R%20then%20S.%20P%20or%20R.%20Does%20Q%20or%20S%20follow%3F">▶ Ask Lithium yourself — same argument, live →</a>
   </section>
 
   <!-- 4 -->
@@ -202,6 +207,7 @@
     <p class="hook">91 looks prime — odd, not divisible by 3 or 5 — so models often say yes. Lithium runs the numbers:
     <b>refuted — 91 = 7 × 13, composite.</b> And when something <em>is</em> prime, it says so with a proof:
     <b>“13 is prime — proven by exhaustive trial division.”</b></p>
+      <a class="demo" href="../../demo.html?q=Is%2091%20prime%3F">▶ Ask Lithium yourself — 91, live →</a>
   </section>
 
   <div class="foot">
