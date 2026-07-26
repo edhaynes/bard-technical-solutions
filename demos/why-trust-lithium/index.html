@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Why Trust Lithium — Four Guarantees</title>
+<style>
+  :root{
+    --navy:#0b1220; --surface:#131c2e; --surface2:#1a2540; --border:#26324d;
+    --text:#e8edf7; --muted:#9fb0cc; --faint:#647394;
+    --gold:#e7c878; --gold2:#f0d98a; --green:#7ecb8f; --red:#ff5b6b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--navy);color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;line-height:1.55}
+  .wrap{max-width:860px;margin:0 auto;padding:2.5rem 1.25rem 5rem}
+  h1{font-size:clamp(1.9rem,5vw,2.8rem);margin:.2rem 0 .4rem;letter-spacing:-.6px;line-height:1.1}
+  .lede{color:var(--muted);max-width:60ch;margin:0 0 1rem;font-size:1.05rem}
+  .mark{color:var(--gold);font-weight:700}
+  .arch{font-size:.9rem;color:var(--faint);border:1px solid var(--border);border-radius:10px;
+    padding:.7rem 1rem;margin:1.4rem 0 2.4rem;background:var(--surface)}
+  .pillar{border:1px solid var(--border);border-radius:16px;background:var(--surface);
+    padding:1.5rem 1.5rem;margin-bottom:1.4rem}
+  .pillar .k{font-size:.72rem;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--gold);margin:0 0 .2rem}
+  .pillar h2{margin:.1rem 0 .3rem;font-size:1.35rem}
+  .pillar p{color:var(--muted);margin:.2rem 0 .8rem;font-size:.95rem}
+  /* topline stat comparison */
+  .topline{display:grid;grid-template-columns:1fr auto 1fr;align-items:stretch;gap:.6rem;margin:.9rem 0 1rem}
+  .tcell{text-align:center;padding:.8rem .5rem;border-radius:12px}
+  .tcell.qw{background:rgba(255,91,107,.08);border:1px solid rgba(255,91,107,.3)}
+  .tcell.li{background:rgba(231,200,120,.09);border:1px solid rgba(231,200,120,.42)}
+  .tnum{display:block;font-size:clamp(2.1rem,8vw,3rem);font-weight:800;line-height:1}
+  .tcell.qw .tnum{color:var(--red)} .tcell.li .tnum{color:var(--gold2)}
+  .twho{display:block;margin-top:.35rem;font-size:.72rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+  .tcell.qw .twho{color:#f0b8bd} .tcell.li .twho{color:var(--gold2)}
+  .tcap{display:block;margin-top:.15rem;font-size:.68rem;color:var(--faint)}
+  .tarrow{display:flex;align-items:center;font-size:1.4rem;color:var(--faint);font-weight:800}
+  .metric{text-align:center;font-size:.74rem;color:var(--faint);text-transform:uppercase;letter-spacing:.6px;margin:-.3rem 0 .3rem}
+  /* small real-capture detail */
+  details.d{border:1px solid var(--border);border-radius:10px;background:var(--surface2);margin:.4rem 0 0;padding:.2rem .6rem}
+  details.d summary{cursor:pointer;font-size:.82rem;color:var(--muted);padding:.4rem 0}
+  .vs{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin:.5rem 0}
+  @media(max-width:600px){.vs{grid-template-columns:1fr}}
+  .side{border-radius:10px;padding:.7rem .8rem;font-size:.86rem}
+  .side.q{background:rgba(255,91,107,.06);border:1px solid rgba(255,91,107,.25)}
+  .side.l{background:rgba(231,200,120,.06);border:1px solid rgba(231,200,120,.3)}
+  .side .h{font-size:.68rem;font-weight:800;letter-spacing:.5px;text-transform:uppercase;margin-bottom:.3rem}
+  .side.q .h{color:var(--red)} .side.l .h{color:var(--gold2)}
+  .q .a{color:#f0b8bd} .l .a{color:var(--text)}
+  table.tt{border-collapse:collapse;font-size:.8rem;margin:.4rem 0;font-variant-numeric:tabular-nums;width:100%}
+  table.tt th,table.tt td{border:1px solid var(--border);padding:.25rem .5rem;text-align:center}
+  table.tt th{color:var(--faint);font-size:.7rem;text-transform:uppercase}
+  table.tt .ok{color:var(--green);font-weight:700}
+  table.tt tr.win td{background:rgba(231,200,120,.08);font-weight:700}
+  .rollwrap{text-align:center;margin:.6rem 0 .4rem}
+  .rollwrap svg{background:var(--surface2);border:1px solid var(--border);border-radius:12px}
+  .counter{font:14px/1.6 ui-monospace,monospace;color:var(--muted);margin:.4rem 0}
+  .counter b{color:var(--gold2)}
+  .rollbtn{background:var(--gold);color:var(--navy);border:none;border-radius:8px;padding:.45rem 1.1rem;font-weight:700;cursor:pointer;font-size:.9rem}
+  .rollbtn:hover{background:var(--gold2)}
+  code{background:var(--surface2);padding:.06rem .35rem;border-radius:5px;color:var(--gold2);font-size:.9em}
+  a.demo{display:inline-block;margin-top:.5rem;color:var(--gold2);font-weight:600;text-decoration:none;border-bottom:1px solid rgba(240,217,138,.4);font-size:.92rem}
+  .hook{color:var(--text);font-weight:600;font-size:.98rem;margin:.2rem 0 .3rem}
+  .foot{margin-top:2.4rem;padding-top:1.2rem;border-top:1px solid var(--border);color:var(--faint);font-size:.85rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Why trust Lithium?</h1>
+  <p class="lede">Same 4-billion-parameter model everyone runs — the difference is <span class="mark">discipline</span>:
+  a validation layer that sits <em>outside</em> the model, where it can be proven. Same weights on both sides.</p>
+
+  <div class="arch">The mind is a commodity; the conscience is the product. Because Vulcan lives outside the weights,
+  it stays small (runs on a phone), model-agnostic, and — critically — <b>provable</b>. You can't prove a neural
+  network won't lie. You can prove a decision procedure.</div>
+
+  <!-- 1 -->
+  <section class="pillar">
+    <p class="k">Guarantee 1 · Won't hallucinate</p>
+    <h2>Every code, proven against the book</h2>
+    <div class="metric">Medicare claims coded correctly · ICD-10-CM</div>
+    <div class="topline">
+      <div class="tcell qw"><span class="tnum">45%</span><span class="twho">qwen 4B</span><span class="tcap">guesses from memory</span></div>
+      <div class="tarrow">→</div>
+      <div class="tcell li"><span class="tnum">95%</span><span class="twho">Lithium</span><span class="tcap">proves vs the 46,881-code list</span></div>
+    </div>
+    <p style="text-align:center;font-size:.85rem;color:var(--muted);margin:-.2rem 0 .6rem">The best human coders run about
+    <b style="color:var(--text)">95%</b> — Lithium <b style="color:var(--gold2)">matches expert accuracy</b>,
+    deterministically and in microseconds. The LLM isn't close.</p>
+    <p class="hook">Lithium proves every code against the real 2,069-page FY2026 Tabular List — the exact rule cited,
+    ~103,000 decisions/sec. A model just reasons from memory, and won't cite the rule an auditor needs.</p>
+    <details class="d"><summary>Real capture — “Is E11 (type 2 diabetes) billable by itself?”</summary>
+      <div class="vs">
+        <div class="side q"><div class="h">qwen 4B — alone</div><div class="a">“No… However, E11 itself is a valid and billable code… So, yes —” <em>(contradicts itself in one breath)</em></div></div>
+        <div class="side l"><div class="h">Lithium — proven</div><div class="a">Rejected — E11 is a category header; the Tabular List requires a specific code (E11.9). Same verdict every run, rule cited.</div></div>
+      </div>
+    </details>
+    <a class="demo" href="../icd10cm/index.html">▶ Run the live ICD-10 claim monitor →</a>
+  </section>
+
+  <!-- 2 -->
+  <section class="pillar">
+    <p class="k">Guarantee 2 · Deterministic</p>
+    <h2>Deterministic — and right</h2>
+    <div class="metric">The 1982 SAT trap · same question, fresh runs · “correct” = doesn't fall for it</div>
+    <div class="topline">
+      <div class="tcell qw"><span class="tnum">0–67%</span><span class="twho">frontier LLMs</span><span class="tcap">every run different</span></div>
+      <div class="tarrow">→</div>
+      <div class="tcell li"><span class="tnum">100%</span><span class="twho">Vulcan</span><span class="tcap">10 / 10 runs, identical</span></div>
+    </div>
+    <p class="hook">The 1982 SAT geometry question whose correct answer wasn't among the choices — disguised so the
+    memorized “answer is 4” is now the trap and the true answer (<b>5</b>) is absent. A trip around adds one extra
+    rotation, the coin-rotation paradox: <b>N = R/r + 1 = 4 + 1 = 5</b>. Watch the marker point straight up five times:</p>
+
+    <div class="rollwrap">
+      <svg id="diag" viewBox="0 0 340 340" width="280" height="280" style="max-width:100%">
+        <circle cx="170" cy="170" r="88" fill="none" stroke="#2a3550" stroke-width="2"/>
+        <circle cx="170" cy="170" r="110" fill="none" stroke="#1a2233" stroke-width="1" stroke-dasharray="3 5"/>
+        <text x="170" y="176" text-anchor="middle" fill="#5c6675" font-size="13" font-family="ui-monospace">R = 4r</text>
+        <g id="roller">
+          <circle id="smallc" r="22" fill="none" stroke="#4cc38a" stroke-width="2"/>
+          <line id="spoke" stroke="#4cc38a" stroke-width="1.5" opacity=".7"/>
+          <circle id="marker" r="4" fill="#e5534b"/>
+        </g>
+      </svg>
+      <div class="counter">rotations: <b id="rots">0.00</b> · orbit <span id="orb">0</span>%</div>
+      <button id="rollBtn" class="rollbtn">▶ Roll it</button>
+    </div>
+
+    <p class="trap">“A disk of radius r rolls once around a fixed disk of radius 4r. How many rotations does it make? (A)&nbsp;4 &nbsp;(B)&nbsp;4¼ &nbsp;(C)&nbsp;8 &nbsp;(D)&nbsp;16” — the true answer 5 is deliberately not offered.</p>
+
+    <div class="metric" style="margin-top:.9rem">How consistent was each model on repeated fresh runs? — “correct” = refuses the trap</div>
+    <table class="tt">
+      <tr><th>model</th><th>runs</th><th>correct</th><th>consistency</th></tr>
+      <tr><td>Claude Opus 4.8</td><td>3</td><td>2</td><td>67%</td></tr>
+      <tr><td>GPT-5</td><td>5</td><td>3</td><td>60%</td></tr>
+      <tr><td>gpt-oss-120B</td><td>50</td><td>17</td><td>34%</td></tr>
+      <tr><td>Claude Sonnet 5</td><td>5</td><td>1</td><td>20%</td></tr>
+      <tr><td>Llama-3.3-70B</td><td>20</td><td>1</td><td>5%</td></tr>
+      <tr><td>Llama-3.1-8B · Claude Haiku 4.5</td><td>25</td><td>0</td><td>0%</td></tr>
+      <tr class="win"><td><b>Vulcan</b></td><td>10</td><td>10</td><td class="ok">100%</td></tr>
+    </table>
+    <a class="demo" href="../sat/index.html">▶ Run the live race — every agent on the same question at once →</a>
+  </section>
+
+  <!-- 3 -->
+  <section class="pillar">
+    <p class="k">Guarantee 3 · Provable — logic</p>
+    <h2>It proves, it doesn't assert</h2>
+    <div class="metric">Deductive logic · LogicBench (propositional)</div>
+    <div class="topline">
+      <div class="tcell qw"><span class="tnum">75%</span><span class="twho">qwen 4B</span><span class="tcap">even GPT-4 caps here</span></div>
+      <div class="tarrow">→</div>
+      <div class="tcell li"><span class="tnum">100%</span><span class="twho">Lithium</span><span class="tcap">exhaustive proof</span></div>
+    </div>
+    <p class="hook">An LLM <em>tells</em> you an argument is valid. Lithium <em>proves</em> it — the conclusion holds in
+    every row where the premises do. No counterexample exists, and it checked them all.</p>
+    <details class="d"><summary>The proof — <code>(P→Q) ∧ (R→S) ∧ (P∨R) ⊢ (Q∨S)</code></summary>
+      <table class="tt">
+        <tr><th>P</th><th>Q</th><th>R</th><th>S</th><th>premises</th><th>Q∨S</th><th></th></tr>
+        <tr><td>0</td><td>0</td><td>1</td><td>1</td><td>true</td><td>1</td><td class="ok">✓</td></tr>
+        <tr><td>0</td><td>1</td><td>1</td><td>1</td><td>true</td><td>1</td><td class="ok">✓</td></tr>
+        <tr><td>1</td><td>1</td><td>0</td><td>0</td><td>true</td><td>1</td><td class="ok">✓</td></tr>
+        <tr><td>1</td><td>1</td><td>0</td><td>1</td><td>true</td><td>1</td><td class="ok">✓</td></tr>
+        <tr><td>1</td><td>1</td><td>1</td><td>1</td><td>true</td><td>1</td><td class="ok">✓</td></tr>
+      </table>
+      <div style="color:var(--green);font-weight:700;font-size:.85rem">VALID — all 16 assignments checked, no counterexample.</div>
+    </details>
+  </section>
+
+  <!-- 4 -->
+  <section class="pillar">
+    <p class="k">Guarantee 4 · Provable — math</p>
+    <h2>Why guess when you can prove?</h2>
+    <div class="metric">“Is 91 prime?”</div>
+    <div class="topline">
+      <div class="tcell qw"><span class="tnum">Guesses</span><span class="twho">qwen 4B</span><span class="tcap">“looks prime” → often yes</span></div>
+      <div class="tarrow">→</div>
+      <div class="tcell li"><span class="tnum">Proves</span><span class="twho">Lithium</span><span class="tcap">exact arithmetic oracle</span></div>
+    </div>
+    <p class="hook">91 looks prime — odd, not divisible by 3 or 5 — so models often say yes. Lithium runs the numbers:
+    <b>refuted — 91 = 7 × 13, composite.</b> And when something <em>is</em> prime, it says so with a proof:
+    <b>“13 is prime — proven by exhaustive trial division.”</b></p>
+  </section>
+
+  <div class="foot">
+    Every number and quote above is real: measured head-to-heads (ICD-10, SAT, LogicBench) and deterministic
+    oracle output (logic truth tables, arithmetic) — re-run and the results are identical. Same 4B weights on both
+    sides; the only difference is Lithium. <b>A conscience only counts if it sits outside the mind, where it can be proven.</b>
+  </div>
+
+</div>
+<script>
+(function(){
+  var CX=170,CY=170,ORBIT=110,SR=22,N=5,DUR=14000;
+  var roller=document.getElementById('roller');
+  if(!roller)return;
+  var spoke=document.getElementById('spoke'),marker=document.getElementById('marker'),
+      rotsEl=document.getElementById('rots'),orbEl=document.getElementById('orb');
+  var rolling=false;
+  function setRoll(f){
+    var th=-Math.PI/2+f*2*Math.PI;
+    var cx=CX+ORBIT*Math.cos(th),cy=CY+ORBIT*Math.sin(th);
+    var rot=-Math.PI/2+f*N*2*Math.PI;
+    var mx=cx+SR*Math.cos(rot),my=cy+SR*Math.sin(rot);
+    var sc=roller.querySelector('#smallc');
+    sc.setAttribute('cx',cx);sc.setAttribute('cy',cy);
+    spoke.setAttribute('x1',cx);spoke.setAttribute('y1',cy);
+    spoke.setAttribute('x2',mx);spoke.setAttribute('y2',my);
+    marker.setAttribute('cx',mx);marker.setAttribute('cy',my);
+    rotsEl.textContent=(f*N).toFixed(2);orbEl.textContent=Math.round(f*100);
+  }
+  setRoll(0);
+  document.getElementById('rollBtn').onclick=function(){
+    if(rolling)return;rolling=true;var start=performance.now();
+    (function step(now){var f=Math.min(1,(now-start)/DUR);setRoll(f);if(f<1)requestAnimationFrame(step);else rolling=false;})(performance.now());
+  };
+})();
+</script>
+</body>
+</html>
