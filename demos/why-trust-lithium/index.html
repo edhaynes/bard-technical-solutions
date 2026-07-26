@@ -28,11 +28,22 @@
   .topline{display:grid;grid-template-columns:1fr auto 1fr;align-items:stretch;gap:.6rem;margin:.9rem 0 1rem}
   .tcell{text-align:center;padding:.8rem .5rem;border-radius:12px}
   .tcell.qw{background:rgba(255,91,107,.08);border:1px solid rgba(255,91,107,.3)}
+  .tcell.hu{background:rgba(159,176,204,.08);border:1px solid rgba(159,176,204,.32)}
   .tcell.li{background:rgba(231,200,120,.09);border:1px solid rgba(231,200,120,.42)}
   .tnum{display:block;font-size:clamp(2.1rem,8vw,3rem);font-weight:800;line-height:1}
-  .tcell.qw .tnum{color:var(--red)} .tcell.li .tnum{color:var(--gold2)}
+  .tcell.qw .tnum{color:var(--red)} .tcell.hu .tnum{color:var(--text)} .tcell.li .tnum{color:var(--gold2)}
   .twho{display:block;margin-top:.35rem;font-size:.72rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
-  .tcell.qw .twho{color:#f0b8bd} .tcell.li .twho{color:var(--gold2)}
+  .tcell.qw .twho{color:#f0b8bd} .tcell.hu .twho{color:var(--muted)} .tcell.li .twho{color:var(--gold2)}
+  /* three-way ladder: model -> human expert -> Lithium */
+  .topline.three{grid-template-columns:1fr auto 1fr auto 1fr}
+  .topline.three .tnum{font-size:clamp(1.6rem,6vw,2.5rem)}
+  @media (max-width:560px){
+    .topline.three{grid-template-columns:1fr;gap:.45rem}
+    .topline.three .tarrow{display:none}
+    .topline.three .tcell{display:flex;align-items:baseline;justify-content:flex-start;gap:.6rem;text-align:left;padding:.55rem .7rem}
+    .topline.three .tnum{font-size:1.7rem;min-width:3.6em}
+    .topline.three .twho,.topline.three .tcap{margin-top:0}
+  }
   .tcap{display:block;margin-top:.15rem;font-size:.68rem;color:var(--faint)}
   .tarrow{display:flex;align-items:center;font-size:1.4rem;color:var(--faint);font-weight:800}
   .metric{text-align:center;font-size:.74rem;color:var(--faint);text-transform:uppercase;letter-spacing:.6px;margin:-.3rem 0 .3rem}
@@ -79,14 +90,16 @@
     <p class="k">Guarantee 1 · Won't hallucinate</p>
     <h2>Every code, proven against the book</h2>
     <div class="metric">Medicare claims coded correctly · ICD-10-CM</div>
-    <div class="topline">
+    <div class="topline three">
       <div class="tcell qw"><span class="tnum">45%</span><span class="twho">qwen 4B</span><span class="tcap">guesses from memory</span></div>
+      <div class="tarrow">→</div>
+      <div class="tcell hu"><span class="tnum">95%</span><span class="twho">expert human</span><span class="tcap">the best certified coders</span></div>
       <div class="tarrow">→</div>
       <div class="tcell li"><span class="tnum">99.9%</span><span class="twho">Lithium</span><span class="tcap">proves vs the 46,881-code list</span></div>
     </div>
-    <p style="text-align:center;font-size:.85rem;color:var(--muted);margin:-.2rem 0 .6rem">The best human coders run about
-    <b style="color:var(--text)">95%</b> — Lithium <b style="color:var(--gold2)">beats them at 99.9%</b>
-    (over 1,500 real FY2026 claims), deterministically and in microseconds. The LLM's 45% isn't close.</p>
+    <p style="text-align:center;font-size:.85rem;color:var(--muted);margin:-.2rem 0 .6rem">Lithium
+    <b style="color:var(--gold2)">clears the human bar</b> over 1,500 real FY2026 claims — deterministically,
+    in microseconds, with the rule cited every time.</p>
     <p class="hook">Lithium proves every code against the real 2,069-page FY2026 Tabular List — the exact rule cited,
     ~103,000 decisions/sec. A model just reasons from memory, and won't cite the rule an auditor needs.</p>
     <details class="d"><summary>Real capture — “Is E11 (type 2 diabetes) billable by itself?”</summary>
