@@ -21,8 +21,16 @@
     padding:.7rem 1rem;margin:1.4rem 0 2.4rem;background:var(--surface)}
   .pillar{border:1px solid var(--border);border-radius:16px;background:var(--surface);
     padding:1.5rem 1.5rem;margin-bottom:1.4rem}
-  .pillar .k{font-size:.72rem;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--gold);margin:0 0 .2rem}
-  .pillar h2{margin:.1rem 0 .3rem;font-size:1.35rem}
+  /* The guarantee IS the claim — it leads. "Guarantee N" stays a small tag so the
+     assertion beside it carries the weight, and the descriptive h2 supports rather
+     than outsizes it. */
+  .pillar .k{display:flex;align-items:baseline;flex-wrap:wrap;gap:.5rem;
+    font-size:clamp(1.45rem,4.6vw,2.05rem);font-weight:800;letter-spacing:-.4px;
+    line-height:1.15;color:var(--gold);margin:0 0 .15rem}
+  .pillar .gno{font-size:.68rem;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;
+    color:var(--faint);border:1px solid var(--border);border-radius:999px;
+    padding:.18rem .5rem;white-space:nowrap;position:relative;top:-.18em}
+  .pillar h2{margin:.1rem 0 .3rem;font-size:1.05rem;font-weight:600;color:var(--muted)}
   .pillar p{color:var(--muted);margin:.2rem 0 .8rem;font-size:.95rem}
   /* topline stat comparison */
   .topline{display:grid;grid-template-columns:1fr auto 1fr;align-items:stretch;gap:.6rem;margin:.9rem 0 1rem}
@@ -87,7 +95,7 @@
 
   <!-- 1 -->
   <section class="pillar">
-    <p class="k">Guarantee 1 · Won't hallucinate</p>
+    <p class="k"><span class="gno">Guarantee 1</span>Won't hallucinate</p>
     <h2>Every code, proven against the book</h2>
     <div class="metric">Medicare claims coded correctly · ICD-10-CM</div>
     <div class="topline three">
@@ -113,8 +121,8 @@
 
   <!-- 2 -->
   <section class="pillar">
-    <p class="k">Guarantee 2 · Deterministic</p>
-    <h2>Deterministic — and right</h2>
+    <p class="k"><span class="gno">Guarantee 2</span>Deterministic</p>
+    <h2>The same answer every run — and the right one</h2>
     <div class="metric">The 1982 SAT trap · same question, fresh runs · “correct” = doesn't fall for it</div>
     <div class="topline">
       <div class="tcell qw"><span class="tnum">0–67%</span><span class="twho">frontier LLMs</span><span class="tcap">every run different</span></div>
@@ -158,7 +166,7 @@
 
   <!-- 3 -->
   <section class="pillar">
-    <p class="k">Guarantee 3 · Provable — logic</p>
+    <p class="k"><span class="gno">Guarantee 3</span>Provable — logic</p>
     <h2>It proves, it doesn't assert</h2>
     <div class="metric">Deductive logic · LogicBench (propositional)</div>
     <div class="topline">
@@ -183,7 +191,7 @@
 
   <!-- 4 -->
   <section class="pillar">
-    <p class="k">Guarantee 4 · Provable — math</p>
+    <p class="k"><span class="gno">Guarantee 4</span>Provable — math</p>
     <h2>Why guess when you can prove?</h2>
     <div class="metric">“Is 91 prime?”</div>
     <div class="topline">
