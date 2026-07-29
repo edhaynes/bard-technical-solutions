@@ -130,7 +130,7 @@
     <div class="label">Pick your field — 3 by default, any combination allowed</div>
     <div id="lanePicker" style="display:flex; gap:14px; flex-wrap:wrap; margin-top:8px; font-size:14px"></div>
     <p class="note" style="margin-top:8px">60-second race cutoff: a lane with
-    no answer by then scores DNF (its eventual answer is noted for honesty).</p>
+    no answer by then scores DNF (its eventual answer is noted for abstention).</p>
   </div>
   <div class="controls">
     <button id="raceBtn">▶ Run the race</button>
@@ -184,7 +184,7 @@
   tokens back at their true recorded cadence, no interpolation. Vulcan's
   verdicts appear together because they really do land together
   (microseconds). Re-run any time with <code>python3 race.py</code>.</p>
-  <p><strong>Honest scoping.</strong> Vulcan is not a geometry solver: in its
+  <p><strong>scoping.</strong> Vulcan is not a geometry solver: in its
   lane, gpt-oss-120b supplies the coin-rotation formula and the translation
   into Vulcan's controlled grammar; Vulcan then proves or refutes each
   candidate with an exact arithmetic oracle (microseconds, deterministic).

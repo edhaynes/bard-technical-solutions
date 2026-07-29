@@ -37,11 +37,11 @@ Newest on top. Latest entry supersedes older ones where they conflict.
 - New `scorecards.html`: measured results for Lithium/Vulcan. Two scorecards — a
   **hallucination** test (Ordinary AI 60% vs Lithium 100%, "Validated by Vulcan™", plus
   76%-faster and 95%-vs-60% determinism) and a **LogicBench reasoning** control
-  (74% ≈ 72%, showing Vulcan makes the model honest without making it dumber; zero
+  (74% ≈ 72%, showing Vulcan makes the model without making it dumber; zero
   abstentions). Same header/footer/nav chrome as the other pages; reuses the site tokens
   with a small scoped `<style>` block for the comparison cards — no changes to `styles.css`.
 - Added "Scorecards" to the primary nav in `index.html` and `team.html`.
-- Honest methodology footnotes on both cards (n, single-run, "a real test, not peer-reviewed");
+- methodology footnotes on both cards (n, single-run, "a real test, not peer-reviewed");
   **no commercial content** per the public-repo rule (no pricing/POC/strategy). Bumped
   `CONFIG.version` 1.3.18 → 1.3.19.
 
@@ -88,7 +88,7 @@ Newest on top. Latest entry supersedes older ones where they conflict.
   constructed diabetes/Cushing's/concussion examples, which stay as the pedagogical explainer.
   New callout section, updated grounding table (3rd source row: CMS Synthetic Medicare Claims
   PUF), updated "how it was built" and "scope" sections to describe both self-consistency
-  (99.93%) and real-claims (1%) testing honestly, as two different things.
+  (99.93%) and real-claims (1%) testing as two different things.
 - Validated: HTML tags balanced, JS `node --check` passes, headless-Chrome render confirms the
   new content and no console errors.
 
@@ -106,7 +106,7 @@ Newest on top. Latest entry supersedes older ones where they conflict.
   `spikes/icd10-cm-coding`) against the parsed FY2026 registry — not invented for the page.
   Measured latency: worst 25.6µs / avg 9.7µs / best 7.7µs / p99 13.5µs over 20,000 `prove()`
   calls, Apple M5 Max single core, CPython 3.14.4. Scoring-harness self-consistency: 99.93% over
-  1,500 sampled claims (300/category × 5 categories) — stated honestly as self-consistency
+  1,500 sampled claims (300/category × 5 categories) — stated as self-consistency
   against the parsed registry, not yet external validation against an independent coder.
 - No patient data anywhere, real or synthetic-identifying — a claim is a bare tuple of diagnosis
   codes. Added as a 5th card on `demos/index.html` (additive only, per the destructive-action
@@ -163,7 +163,7 @@ Newest on top. Latest entry supersedes older ones where they conflict.
   **rebranded to the main site** (navy/gold, `../../styles.css`, Inter/Sora, site header/footer)
   rather than the SAT page's standalone dark-green palette. Leads with a live-capture monitor
   (frames stream at true recorded cadence; each proven NORMAL/ANOMALY and the exact invariant
-  named) + four attack exhibit cards; deep content (honest 53,802-frame comma2k19 RAV4 disclosure
+  named) + four attack exhibit cards; deep content (53,802-frame comma2k19 RAV4 disclosure
   incl. the 40.8% false-positive rate, the invariant catalog, the RAV4-subset DBC) is collapsed
   behind four `<details>` expanders.
 - All verdict/frame data is **verbatim from the real `vulcan can` CLI** (run 2026-07-09 from
